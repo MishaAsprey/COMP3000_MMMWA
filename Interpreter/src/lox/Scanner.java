@@ -97,6 +97,9 @@ class Scanner {
           break;
 
         case '"': string(); break;
+        case '#':
+          water_flow();
+          break;
 
         default:
           if (isDigit(c)) {
@@ -133,6 +136,16 @@ class Scanner {
 
     addToken(NUMBER,
         Double.parseDouble(source.substring(start, current)));
+  }
+
+  private void water_flow(){
+    while (isDigit(peek())) advance();
+    if (peek() == '.' && isDigit(peekNext())) {
+      advance();
+
+      while (isDigit(peek())) advance();
+    }
+    addToken(WATER_FLOW, Double.parseDouble(source.substring(start+1, current)));
   }
 
   private void string() {

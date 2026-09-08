@@ -22,30 +22,30 @@ class Parser {
     }
   }
 
-    private Expr expression() {
+  private Expr expression() {
     return equality();
   }
 
-    private Expr equality() {
-        Expr expr = comparison();
+  private Expr equality() {
+      Expr expr = comparison();
 
-        while (match(BANG_EQUAL, EQUAL_EQUAL)) {
-            Token operator = previous();
-            Expr right = comparison();
-            expr = new Expr.Binary(expr, operator, right);
-        }
+      while (match(BANG_EQUAL, EQUAL_EQUAL)) {
+          Token operator = previous();
+          Expr right = comparison();
+          expr = new Expr.Binary(expr, operator, right);
+      }
 
-        return expr;
-    }
+      return expr;
+  }
 
-    private Expr comparison() {
-        Expr expr = term();
+  private Expr comparison() {
+      Expr expr = term();
 
-        while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
-            Token operator = previous();
-            Expr right = term();
-            expr = new Expr.Binary(expr, operator, right);
-        }
+      while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+          Token operator = previous();
+          Expr right = term();
+          expr = new Expr.Binary(expr, operator, right);
+      }
 
     return expr;
   }
@@ -89,7 +89,7 @@ class Parser {
     if (match(TRUE)) return new Expr.Literal(true);
     if (match(NIL)) return new Expr.Literal(null);
 
-    if (match(NUMBER, STRING)) {
+    if (match(NUMBER, STRING, WATER_FLOW)) {
       return new Expr.Literal(previous().literal);
     }
 
