@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import static lox.TokenType.*; 
+import lox.WaterFlow;
 
 class Scanner {
   private final String source;
@@ -145,7 +146,7 @@ class Scanner {
 
       while (isDigit(peek())) advance();
     }
-    addToken(WATER_FLOW, Double.parseDouble(source.substring(start+1, current)));
+    addToken(WATER_FLOW, new WaterFlow(Double.parseDouble(source.substring(start+1, current))));
   }
 
   private void string() {

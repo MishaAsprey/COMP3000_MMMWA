@@ -22,40 +22,109 @@ class Interpreter implements Expr.Visitor<Object>{
 
         switch (expr.operator.type) {
             case GREATER:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left > (double)right;
+                if(checkNumberOperands(expr.operator, left, right)){ return (double)left > (double)right;}
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    return leftWaterFlow.value > rightWaterFlow.value;
+                }
+                throw new RuntimeError(expr.operator, "Operand must be a number.");
             case GREATER_EQUAL:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left >= (double)right;
+                if(checkNumberOperands(expr.operator, left, right)){
+                    return (double)left >= (double)right;
+                }
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    return leftWaterFlow.value >= rightWaterFlow.value;
+                }
+                throw new RuntimeError(expr.operator, "Operand must be a number.");
             case LESS:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left < (double)right;
+                if(checkNumberOperands(expr.operator, left, right)){
+                    return (double)left < (double)right;
+                }
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    return leftWaterFlow.value < rightWaterFlow.value;
+                }
+                throw new RuntimeError(expr.operator, "Operand must be a number.");
             case LESS_EQUAL:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left <= (double)right;
+                if(checkNumberOperands(expr.operator, left, right)){
+                    return (double)left <= (double)right;
+                }
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    return leftWaterFlow.value <= rightWaterFlow.value;
+                }
+                throw new RuntimeError(expr.operator, "Operand must be a number.");
             case MINUS:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left - (double)right;
+                if(checkNumberOperands(expr.operator, left, right)){
+                    return (double)left - (double)right;
+                }
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    WaterFlow newWaterFlow = new WaterFlow(leftWaterFlow.value - rightWaterFlow.value);
+                    return newWaterFlow;
+                }
+                throw new RuntimeError(expr.operator, "Operand must be a number.");
             case PLUS:
                 
                 if (left instanceof Double && right instanceof Double) {
                     return (double)left + (double)right;
                 } 
 
-                if (left instanceof String && right instanceof String) {
+                else if (left instanceof String && right instanceof String) {
                     return (String)left + (String)right;
+                }
+
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    WaterFlow newWaterFlow = new WaterFlow(leftWaterFlow.value + rightWaterFlow.value);
+                    return newWaterFlow;
                 }
                 throw new RuntimeError(expr.operator,
             "Operands must be two numbers or two strings.");
             
             case SLASH:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left / (double)right;
+                if(checkNumberOperands(expr.operator, left, right)){
+                    return (double)left / (double)right;
+                }
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    WaterFlow newWaterFlow = new WaterFlow(leftWaterFlow.value / rightWaterFlow.value);
+                    return newWaterFlow;
+                }
+                throw new RuntimeError(expr.operator, "Operand must be a number.");
             case STAR:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left * (double)right;
-            case BANG_EQUAL: return !isEqual(left, right);
-            case EQUAL_EQUAL: return isEqual(left, right);
+                if(checkNumberOperands(expr.operator, left, right)){
+                    return (double)left * (double)right;
+                }
+                else if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    WaterFlow newWaterFlow = new WaterFlow(leftWaterFlow.value * rightWaterFlow.value);
+                    return newWaterFlow;
+                }
+                throw new RuntimeError(expr.operator, "Operand must be a number.");
+            case BANG_EQUAL: 
+                if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    return !isEqual(leftWaterFlow.value, rightWaterFlow.value);
+                }
+                return !isEqual(left, right);
+            case EQUAL_EQUAL:
+                if(checkWaterFlowOperands(expr.operator, left, right)){
+                    WaterFlow leftWaterFlow = (WaterFlow)left;
+                    WaterFlow rightWaterFlow = (WaterFlow)right;
+                    return isEqual(leftWaterFlow.value, rightWaterFlow.value);
+                }
+                return isEqual(left, right);
             }
             
 
@@ -78,16 +147,27 @@ class Interpreter implements Expr.Visitor<Object>{
         // Unreachable.
         return null;
     }
-    private void checkNumberOperand(Token operator, Object operand) {
-        if (operand instanceof Double) return;
-        throw new RuntimeError(operator, "Operand must be a number.");
+    private boolean checkNumberOperand(Token operator, Object operand) {
+        if (operand instanceof Double) return true;
+        return false;
     }
 
-    private void checkNumberOperands(Token operator,
+    private boolean checkNumberOperands(Token operator,
                                     Object left, Object right) {
-        if (left instanceof Double && right instanceof Double) return;
-        
-        throw new RuntimeError(operator, "Operands must be numbers.");
+        if (left instanceof Double && right instanceof Double) return true;
+
+        return false;
+    }
+
+    private boolean checkWaterFlowOperand(Token operator, Object operand) {
+        if (operand instanceof WaterFlow) return true;
+        return false;
+    }
+
+    private boolean checkWaterFlowOperands(Token operator,
+                                    Object left, Object right) {
+        if (left instanceof WaterFlow && right instanceof WaterFlow) return true;
+        return false;
     }
 
     private boolean isTruthy(Object object) {
