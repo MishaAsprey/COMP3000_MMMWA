@@ -30,12 +30,12 @@ class Parser {
 
   private Stmt declaration() {
     try {
-      if (match(VAR)) return varDeclaration();
-
-      return statement();
+        if (match(RIVER)) return riverDeclaration();
+        if (match(VAR)) return varDeclaration();
+        return statement();
     } catch (ParseError error) {
-      synchronize();
-      return null;
+        synchronize();
+        return null;
     }
   }
 
@@ -62,6 +62,22 @@ class Parser {
     consume(SEMICOLON, "Expect ';' after variable declaration.");
     return new Stmt.Var(name, initializer);
   }
+
+  private Stmt riverDeclaration() {
+    Token name = consume(IDENTIFIER, "Expect river name.");
+    consume(LEFT_BRACKET, "Expect '[' after river name.");
+
+    List<Expr> fields = new ArrayList<>();
+    if (!check(RIGHT_BRACKET)) {
+        do {
+            fields.add(expression());
+        } while (match(COMMA));
+    }
+
+    consume(RIGHT_BRACKET, "Expect ']' after river fields.");
+    consume(SEMICOLON, "Expect ';' after river declaration.");
+    return new Stmt.River(name, fields);
+  } 
 
   private Stmt expressionStatement() {
     Expr expr = expression();

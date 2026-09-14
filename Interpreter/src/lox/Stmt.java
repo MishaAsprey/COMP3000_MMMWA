@@ -8,6 +8,8 @@ abstract class Stmt {
     R visitExpressionStmt(Expression stmt);
     R visitPrintStmt(Print stmt);
     R visitVarStmt(Var stmt);
+    R visitRiverStmt(River stmt);
+
   }
   static class Block extends Stmt {
     Block(List<Stmt> statements) {
@@ -46,9 +48,9 @@ abstract class Stmt {
     final Expr expression;
   }
   static class Var extends Stmt {
-    Var(Token name, Expr initializer) {
-      this.name = name;
-      this.initializer = initializer;
+      Var(Token name, Expr initializer) {
+        this.name = name;
+        this.initializer = initializer;
     }
 
     @Override
@@ -56,8 +58,23 @@ abstract class Stmt {
       return visitor.visitVarStmt(this);
     }
 
+      final Token name;
+      final Expr initializer;
+  }
+
+static class River extends Stmt {
+    River(Token name, List<Expr> fields) {
+        this.name = name;
+        this.fields = fields;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+        return visitor.visitRiverStmt(this);
+    }
+
     final Token name;
-    final Expr initializer;
+    final List<Expr> fields;
   }
 
   abstract <R> R accept(Visitor<R> visitor);
