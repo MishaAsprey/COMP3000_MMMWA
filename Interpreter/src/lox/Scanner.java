@@ -144,17 +144,10 @@ class Scanner {
       while (isDigit(peek())) advance();
     }
 
-    // number part must be read before we consume any m/b suffix
     double value = Double.parseDouble(source.substring(start + 1, current));
 
-    // million/billion suffix, as documented in the literal design
-    if (peek() == 'm') {
-      advance();
-      value *= 1_000_000;
-    } else if (peek() == 'b') {
-      advance();
-      value *= 1_000_000_000;
-    }
+    // m is always implied - values are in millions, no suffix needed
+    value *= 1_000_000;
 
     addToken(WATER_FLOW, new WaterFlow(value));
 }
