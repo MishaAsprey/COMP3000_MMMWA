@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static lox.TokenType.*; 
-import lox.WaterFlow;
 
 class Scanner {
   private final String source;
@@ -143,11 +141,23 @@ class Scanner {
     while (isDigit(peek())) advance();
     if (peek() == '.' && isDigit(peekNext())) {
       advance();
-
       while (isDigit(peek())) advance();
     }
-    addToken(WATER_FLOW, new WaterFlow(Double.parseDouble(source.substring(start+1, current))));
-  }
+
+    // number part must be read before we consume any m/b suffix
+    double value = Double.parseDouble(source.substring(start + 1, current));
+
+    // million/billion suffix, as documented in the literal design
+    if (peek() == 'm') {
+      advance();
+      value *= 1_000_000;
+    } else if (peek() == 'b') {
+      advance();
+      value *= 1_000_000_000;
+    }
+
+    addToken(WATER_FLOW, new WaterFlow(value));
+}
 
   private void string() {
     while (peek() != '"' && !isAtEnd()) {
