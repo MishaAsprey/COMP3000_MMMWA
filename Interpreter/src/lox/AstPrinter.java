@@ -53,17 +53,19 @@ class AstPrinter implements Expr.Visitor<String> {
             new Expr.Literal(45.67)));
 
     System.out.println(new AstPrinter().print(expression));
-  }
+}
 
   @Override
   public String visitAssignExpr(Assign expr) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'visitAssignExpr'");
+    StringBuilder builder = new StringBuilder();
+      builder.append("(= ").append(expr.name.lexeme).append(" ");
+      builder.append(expr.value.accept(this));
+      builder.append(")");
+      return builder.toString();
   }
 
   @Override
   public String visitVariableExpr(Variable expr) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'visitVariableExpr'");
+      return expr.name.lexeme;
   }
 }
