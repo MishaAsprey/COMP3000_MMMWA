@@ -1,8 +1,16 @@
 package lox;
 
-class AstPrinter implements Expr.Visitor<String> {
-  String print(Expr expr) {
-    return expr.accept(this);
+import java.util.List;
+
+import lox.Expr.Assign;
+import lox.Expr.Variable;
+
+class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
+  Void print(List<Stmt> statements) {
+    for (Stmt statement : statements) {
+      System.out.println(statement.accept(this));
+    }
+    return null;
   }
 
   @Override
@@ -49,6 +57,42 @@ class AstPrinter implements Expr.Visitor<String> {
         new Expr.Grouping(
             new Expr.Literal(45.67)));
 
-    System.out.println(new AstPrinter().print(expression));
+    //System.out.println(new AstPrinter().print(expression));
+  }
+
+  @Override
+  public String visitAssignExpr(Assign expr) {
+    StringBuilder builder = new StringBuilder();
+      builder.append("(= ").append(expr.name.lexeme).append(" ");
+      builder.append(expr.value.accept(this));
+      builder.append(")");
+      return builder.toString();
+  }
+
+  @Override
+  public String visitVariableExpr(Variable expr) {
+      return expr.name.lexeme;
+  }
+
+  @Override
+  public String visitBlockStmt(Stmt.Block stmt) {
+    return "";
+  }
+
+  @Override
+  public String visitExpressionStmt(Stmt.Expression stmt) {
+    return stmt.expression.accept(this);
+  }
+  @Override 
+  public String visitPrintStmt(Stmt.Print stmt) {
+    return "";
+  }
+  @Override
+  public String visitVarStmt(Stmt.Var stmt) {
+    return "";
+  }
+  @Override 
+  public String visitRiverStmt(Stmt.River stmt) {
+    return "";
   }
 }
