@@ -76,7 +76,11 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
 
   @Override
   public String visitBlockStmt(Stmt.Block stmt) {
-    return "";
+  String a = "(";
+      for (Stmt field: stmt.statements) {
+        a += " " + field.accept(this);
+      }
+      return a + ")";
   }
 
   @Override
@@ -85,14 +89,18 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
   }
   @Override 
   public String visitPrintStmt(Stmt.Print stmt) {
-    return "";
+    return "(print " + stmt.expression.accept(this) + ")";
   }
   @Override
   public String visitVarStmt(Stmt.Var stmt) {
-    return "";
+    return "(var " + stmt.name.lexeme + " " + stmt.initializer.accept(this) + ")";
   }
   @Override 
   public String visitRiverStmt(Stmt.River stmt) {
-    return "";
+    String a = "(river " + stmt.name.lexeme;
+    for (Expr field : stmt.fields) {
+      a += " " + field.accept(this);
+    }
+    return a + ")";
   }
 }

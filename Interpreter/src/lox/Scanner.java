@@ -58,6 +58,8 @@ class Scanner {
         case '(': addToken(LEFT_PAREN); break;
         case ')': addToken(RIGHT_PAREN); break;
         case '{': addToken(LEFT_BRACE); break;
+        case '[': addToken(LEFT_BRACKET); break;
+        case ']': addToken(RIGHT_BRACKET); break;
         case '}': addToken(RIGHT_BRACE); break;
         case ',': addToken(COMMA); break;
         case '.': addToken(DOT); break;
@@ -98,6 +100,10 @@ class Scanner {
 
         case '"': string(); break;
 
+        case '#':
+          water_flow();
+          break;
+
         default:
           if (isDigit(c)) {
             number();
@@ -134,6 +140,21 @@ class Scanner {
     addToken(NUMBER,
         Double.parseDouble(source.substring(start, current)));
   }
+
+  private void water_flow(){
+    while (isDigit(peek())) advance();
+    if (peek() == '.' && isDigit(peekNext())) {
+      advance();
+      while (isDigit(peek())) advance();
+    }
+
+    double value = Double.parseDouble(source.substring(start + 1, current));
+
+    // m is always implied - values are in millions, no suffix needed
+    value *= 1;
+
+    addToken(WATER_FLOW, new WaterFlow(value));
+}
 
   private void string() {
     while (peek() != '"' && !isAtEnd()) {
