@@ -68,11 +68,30 @@ class Parser {
     consume(LEFT_BRACKET, "Expect '[' after river name.");
 
     List<Expr> fields = new ArrayList<>();
-    if (!check(RIGHT_BRACKET)) {
-        do {
-            fields.add(expression());
-        } while (match(COMMA));
+
+    if(!check(RIGHT_BRACKET)){
+      if(check(NUMBER)){
+        fields.add(expression());
+        consume(COMMA, "Expect ',' after field");
+        if(check(WATER_FLOW)){
+          fields.add(expression());
+        }
+        else{
+          error(peek(), "Expected Water_Flow expression");
+        }
+      }
+      else{
+        error(peek(), "Expected number expression");
+      }
     }
+
+
+    // if (!check(RIGHT_BRACKET)) {
+    //     do {
+    //         System.out.println(check(NUMBER));
+    //         fields.add(expression());
+    //     } while (match(COMMA));
+    // }
 
     consume(RIGHT_BRACKET, "Expect ']' after river fields.");
     consume(SEMICOLON, "Expect ';' after river declaration.");
