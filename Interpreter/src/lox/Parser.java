@@ -128,9 +128,12 @@ class Parser {
   private Expr outflow() {
       Expr expr = equality();
 
-      while (match(ARROW)) {
+      while (match(ARROW)){
           Token operator = previous();
           Expr right = equality();
+          if (!(right instanceof Expr.Variable)){ //Enforce rule that '->' is for rivers
+            error(operator, "Expected river name after operator '->'.");
+          }
           expr = new Expr.Binary(expr, operator, right);
       }
 

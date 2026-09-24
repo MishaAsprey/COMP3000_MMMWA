@@ -7,8 +7,10 @@ river cMolongolo [8];
 river lMolongolo [10];
 river queanbeyan [12];
 
+print cMolongolo;
+
 googong -> queanbeyan;
 queanbeyan + uMolongolo + jerrabomberra -> cMolongolo;
 cMolongolo -> lMolongolo;
 
-
+print cMolongolo;

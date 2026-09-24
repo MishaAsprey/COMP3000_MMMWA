@@ -151,7 +151,9 @@ class Scanner {
     double value = Double.parseDouble(source.substring(start + 1, current));
 
     // m is always implied - values are in millions, no suffix needed
-    value *= 1_000_000;
+    //Respectfully I'm removing this- when have you ever heard of a programming 
+    //language that stores a different value to the one you gave it ???
+    //value *= 1_000_000;
 
     addToken(WATER_FLOW, new WaterFlow(value));
 }

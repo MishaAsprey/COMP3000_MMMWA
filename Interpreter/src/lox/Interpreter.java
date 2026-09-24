@@ -187,7 +187,13 @@ class Interpreter implements Expr.Visitor<Object>,
                 }
                 throw new RuntimeError(expr.operator, "Operand must be a number.");
             case ARROW:
-                return right;
+                if (!checkWaterFlowOperands(expr.operator, left, right)){
+                    throw new RuntimeError(expr.operator, "Only flows can drain into a river!");
+                }
+                Token river = ((Expr.Variable)expr.right).name;
+                WaterFlow combined = new WaterFlow(((WaterFlow)left).value + ((WaterFlow)right).value);
+                environment.assign(river, combined);
+                return combined;
             case BANG_EQUAL: 
                 if(checkWaterFlowOperands(expr.operator, left, right)){
                     WaterFlow leftWaterFlow = (WaterFlow)left;

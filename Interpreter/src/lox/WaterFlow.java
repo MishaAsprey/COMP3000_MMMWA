@@ -10,6 +10,11 @@ public class WaterFlow {
     }
 
     public String toString(){
-        return "#" + String.valueOf(value);
+        String text = String.valueOf(value);
+        if (text.endsWith(".0")) { //We don't need to express integers as decimals
+            text = text.substring(0, text.length() - 2);
+        }
+        return text + " ML/day";
     }
+
 }
