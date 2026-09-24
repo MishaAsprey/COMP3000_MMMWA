@@ -34,6 +34,12 @@ class Scanner {
     keywords.put("while",  WHILE);
     keywords.put("river",    RIVER);
     keywords.put("dam",  DAM);
+    keywords.put("when",    WHEN);
+    keywords.put("default", DEFAULT);
+    keywords.put("release", RELEASE);
+    keywords.put("inflow",  INFLOW);
+    keywords.put("level",   LEVEL);
+    keywords.put("rain",    RAIN);
   }
 
   Scanner(String source) {
@@ -137,8 +143,16 @@ class Scanner {
       while (isDigit(peek())) advance();
     }
 
-    addToken(NUMBER,
-        Double.parseDouble(source.substring(start, current)));
+    double value = Double.parseDouble(source.substring(start, current));
+
+    //Converts percentages into fractions, so 85% becomes 0.85
+    //There is no safety for people accidentally doing percentages > 100% btw, that's a design choice
+    if (peek() == '%') {
+      advance();
+      value /= 100;
+    }
+
+    addToken(NUMBER, value);
   }
 
   private void water_flow(){
@@ -150,9 +164,12 @@ class Scanner {
 
     double value = Double.parseDouble(source.substring(start + 1, current));
 
+    
+    /*Respectfully I'm removing this- when have you ever heard of a programming 
+    language that stores a different value to the one you gave it ??? */
+    
+
     // m is always implied - values are in millions, no suffix needed
-    //Respectfully I'm removing this- when have you ever heard of a programming 
-    //language that stores a different value to the one you gave it ???
     //value *= 1_000_000;
 
     addToken(WATER_FLOW, new WaterFlow(value));

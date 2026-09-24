@@ -14,3 +14,6 @@ queanbeyan + uMolongolo + jerrabomberra -> cMolongolo;
 cMolongolo -> lMolongolo;
 
 print cMolongolo;
+print 120%;
+print 5%;
+print 50%;
