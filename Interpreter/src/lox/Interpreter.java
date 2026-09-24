@@ -83,6 +83,14 @@ class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitDamStmt(Stmt.Dam stmt) {
+        // Dams pass water straight through until they get real behaviour in step 5
+        evaluate(stmt.capacity);
+        environment.define(stmt.name.lexeme, new WaterFlow(0));
+        return null;
+    }
+
+    @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.value);
         environment.assign(expr.name, value);

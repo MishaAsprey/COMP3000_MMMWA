@@ -30,6 +30,7 @@ class Parser {
   private Stmt declaration() {
     try {
         if (match(RIVER)) return riverDeclaration();
+        if (match(DAM)) return damDeclaration();
         if (match(VAR)) return varDeclaration();
         return statement();
     } catch (ParseError error) {
@@ -77,6 +78,36 @@ class Parser {
     consume(SEMICOLON, "Expect ';' after river declaration.");
     return new Stmt.River(name, fields);
   } 
+
+  private Stmt damDeclaration() {
+    Token name = consume(IDENTIFIER, "Expect dam name.");
+    consume(LEFT_BRACKET, "Expect '[' after dam name.");
+    Expr capacity = expression();
+    consume(RIGHT_BRACKET, "Expect ']' after dam capacity.");
+    consume(LEFT_BRACE, "Expect '{' before dam rules.");
+
+    List<Expr> conditions = new ArrayList<>();
+    List<Expr> releases = new ArrayList<>();
+    while (match(WHEN)) {
+      conditions.add(expression());
+      consume(COLON, "Expect ':' after when condition.");
+      releases.add(releaseRule());
+    }
+
+    consume(DEFAULT, "Expect 'default' rule at the end of a dam.");
+    consume(COLON, "Expect ':' after 'default'.");
+    Expr defaultRelease = releaseRule();
+
+    consume(RIGHT_BRACE, "Expect '}' after dam rules.");
+    return new Stmt.Dam(name, capacity, conditions, releases, defaultRelease);
+  }
+
+  private Expr releaseRule() {
+    consume(RELEASE, "Expect 'release' in dam rule.");
+    Expr amount = expression();
+    consume(SEMICOLON, "Expect ';' after dam rule.");
+    return amount;
+  }
 
   private Stmt expressionStatement() {
     Expr expr = expression();
@@ -195,6 +226,10 @@ class Parser {
       return new Expr.Literal(previous().literal);
     }
 
+    if (match(INFLOW, LEVEL, RAIN)) {
+      return new Expr.Variable(previous());
+    }
+
     if (match(IDENTIFIER)) {
       return new Expr.Variable(previous());
     }
@@ -268,6 +303,8 @@ class Parser {
         case WHILE:
         case PRINT:
         case RETURN:
+        case RIVER:
+        case DAM:
           return;
       }
 

@@ -9,6 +9,7 @@ abstract class Stmt {
     R visitPrintStmt(Print stmt);
     R visitVarStmt(Var stmt);
     R visitRiverStmt(River stmt);
+    R visitDamStmt(Dam stmt);
 
   }
   static class Block extends Stmt {
@@ -75,6 +76,27 @@ static class River extends Stmt {
 
     final Token name;
     final List<Expr> fields;
+  }
+
+  static class Dam extends Stmt {
+    Dam(Token name, Expr capacity, List<Expr> conditions, List<Expr> releases, Expr defaultRelease) {
+      this.name = name;
+      this.capacity = capacity;
+      this.conditions = conditions;
+      this.releases = releases;
+      this.defaultRelease = defaultRelease;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitDamStmt(this);
+    }
+
+    final Token name;
+    final Expr capacity;
+    final List<Expr> conditions;
+    final List<Expr> releases;
+    final Expr defaultRelease;
   }
 
   abstract <R> R accept(Visitor<R> visitor);
