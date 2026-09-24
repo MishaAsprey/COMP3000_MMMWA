@@ -69,10 +69,16 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitRiverStmt(Stmt.River stmt) {
-        // TODO: evaluate river fields once we have real semantics for them
-        for (Expr field : stmt.fields) {
-         evaluate(field);
-     }
+        // TODO:evaluate river fields once we have real semantics for them
+        //POST? I don't really know if I'm "doing that" but I want to implement my arrow "->"
+        //which means I need to be able to save rivers and shit
+        Object flow = new WaterFlow(0);
+        for (int i = 0; i < stmt.fields.size(); i++){
+            Object value = evaluate(stmt.fields.get(i));
+            if (i == 1) flow = value;
+        }
+
+        environment.define(stmt.name.lexeme, flow);
         return null;
     }
 
@@ -180,6 +186,8 @@ class Interpreter implements Expr.Visitor<Object>,
                     return newWaterFlow;
                 }
                 throw new RuntimeError(expr.operator, "Operand must be a number.");
+            case ARROW:
+                return right;
             case BANG_EQUAL: 
                 if(checkWaterFlowOperands(expr.operator, left, right)){
                     WaterFlow leftWaterFlow = (WaterFlow)left;
