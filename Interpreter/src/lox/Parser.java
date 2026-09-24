@@ -2,7 +2,6 @@ package lox;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import static lox.TokenType.*;
 
 class Parser {
@@ -97,7 +96,7 @@ class Parser {
   }
 
   private Expr assignment() {
-    Expr expr = equality();
+    Expr expr = outflow();
 
     if (match(EQUAL)) {
       Token equals = previous();
@@ -120,6 +119,18 @@ class Parser {
       while (match(BANG_EQUAL, EQUAL_EQUAL)) {
           Token operator = previous();
           Expr right = comparison();
+          expr = new Expr.Binary(expr, operator, right);
+      }
+
+      return expr;
+  }
+
+  private Expr outflow() {
+      Expr expr = equality();
+
+      while (match(ARROW)) {
+          Token operator = previous();
+          Expr right = equality();
           expr = new Expr.Binary(expr, operator, right);
       }
 

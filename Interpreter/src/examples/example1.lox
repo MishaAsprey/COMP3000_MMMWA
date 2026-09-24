@@ -1,0 +1,14 @@
+//Root rivers fed only by rainfall
+
+river googong [15, #1.2];
+river jerrabomberra [10, #0.8];
+river uMolongolo [25, #2.5];
+river cMolongolo [8];
+river lMolongolo [10];
+river queanbeyan [12];
+
+googong -> quenbeyan;
+queanbeyan + uMolongolo + jerrabomberra -> cMolongolo;
+cMolongolo -> lMolongolo;
+
+
