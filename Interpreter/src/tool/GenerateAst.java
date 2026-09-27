@@ -28,7 +28,8 @@ public class GenerateAst {
       "Print      : Expr expression",
       "Var        : Token name, Expr initializer",
       "River      : Token name, List<Expr> fields",
-      "Dam        : Token name, Expr capacity, List<Expr> conditions, List<Expr> releases, Expr defaultRelease"
+      "Dam        : Token name, Expr capacity, List<Expr> conditions, List<Expr> releases, Expr defaultRelease",
+      "Map        : Token keyword"
     ));
 
   }

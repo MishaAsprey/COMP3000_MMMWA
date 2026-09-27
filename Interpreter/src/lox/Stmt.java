@@ -10,6 +10,7 @@ abstract class Stmt {
     R visitVarStmt(Var stmt);
     R visitRiverStmt(River stmt);
     R visitDamStmt(Dam stmt);
+    R visitMapStmt(Map stmt);
 
   }
   static class Block extends Stmt {
@@ -97,6 +98,19 @@ static class River extends Stmt {
     final List<Expr> conditions;
     final List<Expr> releases;
     final Expr defaultRelease;
+  }
+
+  static class Map extends Stmt {
+    Map(Token keyword) {
+      this.keyword = keyword;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitMapStmt(this);
+    }
+
+    final Token keyword;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

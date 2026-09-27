@@ -40,6 +40,7 @@ class Scanner {
     keywords.put("inflow",  INFLOW);
     keywords.put("level",   LEVEL);
     keywords.put("rain",    RAIN);
+    keywords.put("map",     MAP);
   }
 
   Scanner(String source) {

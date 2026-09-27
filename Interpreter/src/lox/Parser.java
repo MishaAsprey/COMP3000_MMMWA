@@ -41,8 +41,15 @@ class Parser {
 
   private Stmt statement() {
     if (match(PRINT)) return printStatement();
+    if (match(MAP)) return mapStatement();
     if (match(LEFT_BRACE)) return new Stmt.Block(block());
     return expressionStatement();
+  }
+
+  private Stmt mapStatement() {
+    Token keyword = previous();
+    consume(SEMICOLON, "Expect ';' after 'map'.");
+    return new Stmt.Map(keyword);
   }
 
   private Stmt printStatement() {

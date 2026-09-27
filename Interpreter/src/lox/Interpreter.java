@@ -6,6 +6,7 @@ class Interpreter implements Expr.Visitor<Object>,
                              Stmt.Visitor<Void> {
 
     private Environment environment = new Environment();
+    private final RiverMap riverMap = new RiverMap();
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -79,6 +80,7 @@ class Interpreter implements Expr.Visitor<Object>,
         }
 
         environment.define(stmt.name.lexeme, flow);
+        riverMap.add(stmt.name.lexeme, "river");
         return null;
     }
 
@@ -87,7 +89,32 @@ class Interpreter implements Expr.Visitor<Object>,
         // Dams pass water straight through until they get real behaviour in step 5
         evaluate(stmt.capacity);
         environment.define(stmt.name.lexeme, new WaterFlow(0));
+        riverMap.add(stmt.name.lexeme, "dam");
         return null;
+    }
+
+    @Override
+    public Void visitMapStmt(Stmt.Map stmt) {
+        riverMap.print();
+        return null;
+    }
+
+    // Finds the rivers on the left of '->' so the map knows what drains where.
+    // In 'a + b -> c' both a and b drain into c; in '(a -> b) -> c' only b does.
+    private void recordUpstream(Expr expr, String downstream) {
+        if (expr instanceof Expr.Variable) {
+            riverMap.connect(((Expr.Variable)expr).name.lexeme, downstream);
+        } else if (expr instanceof Expr.Grouping) {
+            recordUpstream(((Expr.Grouping)expr).expression, downstream);
+        } else if (expr instanceof Expr.Binary) {
+            Expr.Binary binary = (Expr.Binary)expr;
+            if (binary.operator.type == TokenType.ARROW) {
+                recordUpstream(binary.right, downstream);
+            } else if (binary.operator.type == TokenType.PLUS) {
+                recordUpstream(binary.left, downstream);
+                recordUpstream(binary.right, downstream);
+            }
+        }
     }
 
     @Override
@@ -201,6 +228,7 @@ class Interpreter implements Expr.Visitor<Object>,
                 Token river = ((Expr.Variable)expr.right).name;
                 WaterFlow combined = new WaterFlow(((WaterFlow)left).value + ((WaterFlow)right).value);
                 environment.assign(river, combined);
+                recordUpstream(expr.left, river.lexeme);
                 return combined;
             case BANG_EQUAL: 
                 if(checkWaterFlowOperands(expr.operator, left, right)){
