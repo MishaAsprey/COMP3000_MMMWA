@@ -1,0 +1,38 @@
+var floodLevel = #8;
+
+river rivA [30, #3.5];
+river rivB [22, #4.25];
+river rivC [9, #0.75];
+river rivD [5];
+river rivE [40];
+
+dam damA [500] {
+  default: release 100%;
+}
+
+river rivF [6, #0.5];
+river rivG [3];
+
+{
+  var combined = rivA + rivB;
+  print "rivA + rivB:";
+  print combined;
+}
+
+(rivA + rivB) -> damA -> rivD;
+rivC + rivD -> rivE;
+rivF -> rivG;
+
+print "rivE:";
+print rivE;
+
+print "Is the town flooding?";
+print rivE >= floodLevel;
+
+floodLevel = #12;
+print "After the levee upgrade, is it flooding?";
+print rivE >= floodLevel;
+print "Spare capacity before flooding:";
+print floodLevel - rivE;
+
+map;

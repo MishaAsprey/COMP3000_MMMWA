@@ -1,23 +1,26 @@
-river googong [15, #1.2];
-river jerrabomberra [10, #0.8];
-river uMolongolo [25, #2.5];
+river rivA [15, #1.2];
+river rivB [10, #0.8];
+river rivC [25, #2.5];
 
-river queanbeyan [12];
-river cMolongolo [8];
-river lMolongolo [10];
+river rivD [12];
+river rivE [8];
+river rivF [10];
 
-dam googongDam [119000] {
-  when level > 90%: release 100%;
-  default:          release 30%;
+dam damA [119000] {
+  when level > 95%:   release 100%;
+  when inflow > #50:  release 60%;
+  default:            release 20%;
 }
 
-dam scrivener [28000] {
-  when rain > 20:   release 100%;
-  when level < 10%: release 0%;
-  default:          release 50%;
+dam damB [28000] {
+  when rain > 20:     release 100%;
+  when level < 10%:   release 0%;
+  default:            release 50%;
 }
 
-googong -> googongDam -> queanbeyan;
-queanbeyan + uMolongolo + jerrabomberra -> cMolongolo -> scrivener -> lMolongolo;
+rivA -> damA -> rivD;
+rivD + rivC + rivB -> rivE -> damB -> rivF;
 
-print lMolongolo;
+print rivF;
+
+map;
