@@ -259,7 +259,9 @@ class Interpreter implements Expr.Visitor<Object>,
             case BANG:
                 return !isTruthy(right);
             case MINUS:
-                checkNumberOperand(expr.operator, right);
+                if (!checkNumberOperand(expr.operator, right)) {
+                    throw new RuntimeError(expr.operator, "Operand must be a number.");
+                }
                 return -(double)right;
             }
 

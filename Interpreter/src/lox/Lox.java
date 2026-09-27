@@ -55,6 +55,15 @@ public class Lox {
             // Stop if there was a syntax error.
             if (hadError) return;
 
+            // Show the tree the parser built, then run it.
+            AstPrinter printer = new AstPrinter();
+            System.out.println("-- AST --");
+            for (Stmt statement : statements) {
+                System.out.println(printer.print(statement));
+            }
+            System.out.println();
+            System.out.println("-- Output --");
+
             interpreter.interpret(statements);
         }
     
