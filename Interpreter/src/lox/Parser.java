@@ -68,10 +68,20 @@ class Parser {
     consume(LEFT_BRACKET, "Expect '[' after river name.");
 
     List<Expr> fields = new ArrayList<>();
-    if (!check(RIGHT_BRACKET)) {
-        do {
-            fields.add(expression());
-        } while (match(COMMA));
+    if(!check(RIGHT_BRACKET)){
+      if(check(NUMBER) || check(IDENTIFIER)){
+        fields.add(expression());
+        consume(COMMA, "Expect ',' after field");
+        if(check(WATER_FLOW) || check(IDENTIFIER)){
+          fields.add(expression());
+        }
+        else{
+          error(peek(), "Expected Water_Flow expression");
+        }
+      }
+      else{
+        error(peek(), "Expected number expression");
+      }
     }
 
     consume(RIGHT_BRACKET, "Expect ']' after river fields.");

@@ -1,5 +1,6 @@
 package lox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class Interpreter implements Expr.Visitor<Object>,
@@ -70,9 +71,11 @@ class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Void visitRiverStmt(Stmt.River stmt) {
         // TODO: evaluate river fields once we have real semantics for them
+        List<Object> values = new ArrayList<>();
         for (Expr field : stmt.fields) {
-         evaluate(field);
-     }
+            values.add(evaluate(field));
+        }
+        environment.define(stmt.name.lexeme, values);
         return null;
     }
 

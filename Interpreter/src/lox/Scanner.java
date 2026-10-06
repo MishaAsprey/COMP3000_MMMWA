@@ -148,8 +148,7 @@ class Scanner {
 
     double value = Double.parseDouble(source.substring(start + 1, current));
 
-    // m is always implied - values are in millions, no suffix needed
-    value *= 1_000_000;
+    //value *= 1_000_000;
 
     addToken(WATER_FLOW, new WaterFlow(value));
 }
