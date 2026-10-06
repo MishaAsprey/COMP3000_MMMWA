@@ -32,6 +32,7 @@ class Parser {
     try {
         if (match(RIVER)) return riverDeclaration();
         if (match(VAR)) return varDeclaration();
+        if (match(DAM)) return damDeclaration();
         return statement();
     } catch (ParseError error) {
         synchronize();
@@ -88,6 +89,40 @@ class Parser {
     consume(SEMICOLON, "Expect ';' after river declaration.");
     return new Stmt.River(name, fields);
   } 
+
+  private Stmt damDeclaration(){
+    Token name = consume(IDENTIFIER, "Expect variable name.");
+    consume(LEFT_BRACKET, "Expect '[' after river name.");
+
+    List<Expr> fields = new ArrayList<>();
+    if(!check(RIGHT_BRACKET)){
+      if(check(NUMBER) || check(IDENTIFIER)){
+        fields.add(expression());
+        consume(COMMA, "Expect ',' after field");
+        if(check(WATER_FLOW) || check(IDENTIFIER)){
+          fields.add(expression());
+          consume(COMMA, "Expect ',' after field");
+          if(check(WATER_FLOW) || check(IDENTIFIER)){
+            fields.add(expression());
+          }
+          else{
+            error(peek(), "Expected Water_Flow expression");
+          }
+        }
+        else{
+          error(peek(), "Expected Water_Flow expression");
+        }
+      }
+      else{
+        error(peek(), "Expected number expression");
+      }
+    }
+
+    consume(RIGHT_BRACKET, "Expect ']' after river fields.");
+    consume(SEMICOLON, "Expect ';' after river declaration.");
+
+    return new Stmt.Dam(name, fields);
+  }
 
   private Stmt expressionStatement() {
     Expr expr = expression();

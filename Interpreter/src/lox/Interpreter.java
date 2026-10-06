@@ -80,6 +80,17 @@ class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitDamStmt(Stmt.Dam stmt) {
+        // TODO: evaluate river fields once we have real semantics for them
+        List<Object> values = new ArrayList<>();
+        for (Expr field : stmt.fields) {
+            values.add(evaluate(field));
+        }
+        environment.define(stmt.name.lexeme, values);
+        return null;
+    }
+
+    @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.value);
         environment.assign(expr.name, value);

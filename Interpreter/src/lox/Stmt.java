@@ -9,6 +9,7 @@ abstract class Stmt {
     R visitPrintStmt(Print stmt);
     R visitVarStmt(Var stmt);
     R visitRiverStmt(River stmt);
+    R visitDamStmt(Dam stmt);
 
   }
   static class Block extends Stmt {
@@ -71,6 +72,21 @@ static class River extends Stmt {
     @Override
     <R> R accept(Visitor<R> visitor) {
         return visitor.visitRiverStmt(this);
+    }
+
+    final Token name;
+    final List<Expr> fields;
+  }
+
+  static class Dam extends Stmt {
+    Dam(Token name, List<Expr> fields) {
+        this.name = name;
+        this.fields = fields;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+        return visitor.visitDamStmt(this);
     }
 
     final Token name;
