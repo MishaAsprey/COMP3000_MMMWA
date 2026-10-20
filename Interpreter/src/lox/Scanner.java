@@ -34,6 +34,8 @@ class Scanner {
     keywords.put("while",  WHILE);
     keywords.put("river",    RIVER);
     keywords.put("dam",  DAM);
+    keywords.put("default",  DEFAULT);
+    keywords.put("when",  WHEN);
   }
 
   Scanner(String source) {
@@ -66,6 +68,7 @@ class Scanner {
         case '+': addToken(PLUS); break;
         case ';': addToken(SEMICOLON); break;
         case '*': addToken(STAR); break; 
+        case '%': addToken(PERCENT); break;
         case '!':
           addToken(match('=') ? BANG_EQUAL : BANG);
           break;

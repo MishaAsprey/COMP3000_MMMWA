@@ -1,7 +1,9 @@
 package lox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static lox.TokenType.*;
 
@@ -92,7 +94,7 @@ class Parser {
 
   private Stmt damDeclaration(){
     Token name = consume(IDENTIFIER, "Expect variable name.");
-    consume(LEFT_BRACKET, "Expect '[' after river name.");
+    consume(LEFT_BRACKET, "Expect '[' after dam name.");
 
     List<Expr> fields = new ArrayList<>();
     if(!check(RIGHT_BRACKET)){
@@ -118,10 +120,68 @@ class Parser {
       }
     }
 
-    consume(RIGHT_BRACKET, "Expect ']' after river fields.");
-    consume(SEMICOLON, "Expect ';' after river declaration.");
+    consume(RIGHT_BRACKET, "Expect ']' after dam fields.");
 
-    return new Stmt.Dam(name, fields);
+    consume(LEFT_BRACE, "Expect '{' after dam fields.");
+
+    List<Expr> nums = new ArrayList<>();
+    Map<String, List<Expr>> cases = new HashMap<>();
+
+    while(!check(DEFAULT)){
+      consume(WHEN, "Expect when");
+      String bool = "";
+      if(check(EQUAL)){
+        consume(EQUAL, "Expected =");
+        bool = "=";
+      }
+      else if(check(GREATER)){
+        consume(GREATER, "Expected >");
+        bool = ">";
+      }
+      else if(check(GREATER_EQUAL)){
+        consume(GREATER_EQUAL, "Expected >=");
+        bool = ">=";
+      }
+      else if(check(LESS)){
+        consume(LESS, "Expected <");
+        bool = "<";
+      }
+      else if(check(LESS_EQUAL)){
+        consume(LESS_EQUAL, "Expected <=");
+        bool = "<=";
+      }
+      else{
+        error(peek(), "Expected =, <, <=, > or >=");
+      }
+      nums.add(expression());
+      consume(PERCENT, "Expect %");
+      consume(EQUAL, "Expect =");
+      if(check(WATER_FLOW) || check(IDENTIFIER)){
+        nums.add(expression());
+        cases.put(bool, nums);
+      }
+      else{
+        error(peek(), "Expected Water_Flow expression");
+      }
+      nums = new ArrayList<>();
+      consume(COMMA, "Expect ,");
+    }
+
+    consume(DEFAULT, "Expect default case");
+    consume(EQUAL, "Expect =");
+    if(check(WATER_FLOW) || check(IDENTIFIER)){
+      nums.add(expression());
+      cases.put("Default", nums);
+    }
+    else{
+      error(peek(), "Expected Water_Flow expression");
+    }
+
+    consume(RIGHT_BRACE, "Expect '}' after dam fields.");
+
+    consume(SEMICOLON, "Expect ';' after dam declaration.");
+
+    return new Stmt.Dam(name, fields, cases);
   }
 
   private Stmt expressionStatement() {

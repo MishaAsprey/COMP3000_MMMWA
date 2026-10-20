@@ -1,6 +1,7 @@
 package lox;
 
 import java.util.List;
+import java.util.Map;
 
 abstract class Stmt {
   interface Visitor<R> {
@@ -79,9 +80,10 @@ static class River extends Stmt {
   }
 
   static class Dam extends Stmt {
-    Dam(Token name, List<Expr> fields) {
+    Dam(Token name, List<Expr> fields, Map<String, List<Expr>> cases) {
         this.name = name;
         this.fields = fields;
+        this.cases = cases;
     }
 
     @Override
@@ -91,6 +93,7 @@ static class River extends Stmt {
 
     final Token name;
     final List<Expr> fields;
+    final Map<String, List<Expr>> cases;
   }
 
   abstract <R> R accept(Visitor<R> visitor);
