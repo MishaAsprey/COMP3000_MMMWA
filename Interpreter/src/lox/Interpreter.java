@@ -45,6 +45,12 @@ class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitSetupStmt(Stmt.Setup stmt) {
+        executeBlock(stmt.statements, environment);
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
         return null;

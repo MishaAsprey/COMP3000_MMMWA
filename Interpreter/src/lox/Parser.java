@@ -32,6 +32,7 @@ class Parser {
 
   private Stmt declaration() {
     try {
+        if (match(SETUP)) return setupDeclaration();
         if (match(RIVER)) return riverDeclaration();
         if (match(VAR)) return varDeclaration();
         if (match(DAM)) return damDeclaration();
@@ -40,6 +41,13 @@ class Parser {
         synchronize();
         return null;
     }
+  }
+
+  private Stmt setupDeclaration() {
+    consume(LEFT_BRACE, "Expect '{' after Setup.");
+    List<Stmt> statements = block();
+    consume(SEMICOLON, "Expect ';' after Setup block.");
+    return new Stmt.Setup(statements);
   }
 
   private Stmt statement() {
@@ -72,10 +80,10 @@ class Parser {
 
     List<Expr> fields = new ArrayList<>();
     if(!check(RIGHT_BRACKET)){
-      if(check(NUMBER) || check(IDENTIFIER)){
+      if(check(NUMBER) || check(WATER_FLOW) || check(IDENTIFIER)){
         fields.add(expression());
         consume(COMMA, "Expect ',' after field");
-        if(check(WATER_FLOW) || check(IDENTIFIER)){
+        if(check(NUMBER) || check(WATER_FLOW) || check(IDENTIFIER)){
           fields.add(expression());
         }
         else{
@@ -88,7 +96,7 @@ class Parser {
     }
 
     consume(RIGHT_BRACKET, "Expect ']' after river fields.");
-    consume(SEMICOLON, "Expect ';' after river declaration.");
+    match(SEMICOLON);
     return new Stmt.River(name, fields);
   } 
 

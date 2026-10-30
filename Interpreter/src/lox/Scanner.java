@@ -34,6 +34,8 @@ class Scanner {
     keywords.put("while",  WHILE);
     keywords.put("river",    RIVER);
     keywords.put("dam",  DAM);
+    keywords.put("Setup", SETUP);
+    keywords.put("setup", SETUP);
     keywords.put("default",  DEFAULT);
     keywords.put("when",  WHEN);
   }
