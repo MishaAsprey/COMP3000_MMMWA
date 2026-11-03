@@ -8,6 +8,11 @@ class Interpreter implements Expr.Visitor<Object>,
 
     private Environment environment = new Environment();
 
+    private final FlowSimulation flowSimulation =
+        new FlowSimulation(10);
+
+    private int currentDay = 1;
+    
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
     return expr.value;
@@ -52,9 +57,21 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitDaysStmt(Stmt.Days stmt) {
-        for (int day = 0; day < 10; day++) {
-            executeBlock(stmt.statements, new Environment(environment));
-        }
+
+    // Executes the Days block once for each simulation day.
+        try {
+         for (int day = 1; day <= 10; day++) {
+                currentDay = day;
+
+             executeBlock(
+                     stmt.statements,
+                       new Environment(environment)
+              );
+          }
+     } finally {
+         currentDay = 1;
+      }
+
         return null;
     }
 
@@ -84,12 +101,38 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitRiverStmt(Stmt.River stmt) {
-        // TODO: evaluate river fields once we have real semantics for them
+
+        // Evaluates the river declaration fields.
         List<Object> values = new ArrayList<>();
-        for (Expr field : stmt.fields) {
+
+     for (Expr field : stmt.fields) {
             values.add(evaluate(field));
-        }
-        environment.define(stmt.name.lexeme, values);
+     }
+
+        // Checks that the river has a length and initial flow.
+     if (values.size() != 2 ||
+              !(values.get(0) instanceof Double) ||
+              !(values.get(1) instanceof WaterFlow)) {
+
+          throw new RuntimeError(
+                 stmt.name,
+                 "River requires a length and an initial WaterFlow value."
+            );
+     }
+
+     double length = (double) values.get(0);
+     WaterFlow initialFlow = (WaterFlow) values.get(1);
+
+     // Registers the river with the simulation.
+     flowSimulation.addRiver(
+                stmt.name.lexeme,
+                length,
+             initialFlow
+     );
+
+     // Stores the river declaration in the environment.
+     environment.define(stmt.name.lexeme, values);
+
         return null;
     }
 
@@ -252,12 +295,33 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Object visitGetExpr(Expr.Get expr) {
-        Object object = evaluate(expr.object);
-        if (object instanceof List<?> && expr.name.lexeme.equals("flow")) {
-            List<?> fields = (List<?>)object;
-            if (fields.size() > 1) return fields.get(1);
-        }
-        throw new RuntimeError(expr.name, "Only rivers have a 'flow' property.");
+
+     Object object = evaluate(expr.object);
+
+     // Checks whether the property belongs to a river.
+      if (object instanceof List<?> &&
+             expr.name.lexeme.equals("flow") &&
+             expr.object instanceof Expr.Variable) {
+
+         String riverName =
+                 ((Expr.Variable) expr.object).name.lexeme;
+
+            // Retrieves the river's flow for the current day.
+         try {
+               return flowSimulation.getDailyFlow(
+                      riverName,
+                      currentDay
+              );
+
+         } catch (IllegalArgumentException error) {
+                throw new RuntimeError(expr.name, error.getMessage());
+         }
+       }
+
+      throw new RuntimeError(
+              expr.name,
+              "Only rivers have a 'flow' property."
+        );
     }
 
     private boolean checkNumberOperand(Token operator, Object operand) {
