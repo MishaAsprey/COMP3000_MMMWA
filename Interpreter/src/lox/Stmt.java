@@ -6,6 +6,8 @@ import java.util.Map;
 abstract class Stmt {
   interface Visitor<R> {
     R visitBlockStmt(Block stmt);
+    R visitSetupStmt(Setup stmt);
+    R visitDaysStmt(Days stmt);
     R visitExpressionStmt(Expression stmt);
     R visitPrintStmt(Print stmt);
     R visitVarStmt(Var stmt);
@@ -21,6 +23,30 @@ abstract class Stmt {
     @Override
     <R> R accept(Visitor<R> visitor) {
       return visitor.visitBlockStmt(this);
+    }
+
+    final List<Stmt> statements;
+  }
+  static class Setup extends Stmt {
+    Setup(List<Stmt> statements) {
+      this.statements = statements;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitSetupStmt(this);
+    }
+
+    final List<Stmt> statements;
+  }
+  static class Days extends Stmt {
+    Days(List<Stmt> statements) {
+      this.statements = statements;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitDaysStmt(this);
     }
 
     final List<Stmt> statements;
