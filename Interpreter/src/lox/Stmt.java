@@ -65,7 +65,7 @@ abstract class Stmt {
   }
 
 static class River extends Stmt {
-    River(Token name, List<Expr> fields) {
+    River(Token name, List<Object> fields) {
         this.name = name;
         this.fields = fields;
     }
@@ -76,7 +76,7 @@ static class River extends Stmt {
     }
 
     final Token name;
-    final List<Expr> fields;
+    final List<Object> fields;
   }
 
   static class Dam extends Stmt {

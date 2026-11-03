@@ -70,7 +70,7 @@ class Parser {
     Token name = consume(IDENTIFIER, "Expect river name.");
     consume(LEFT_BRACKET, "Expect '[' after river name.");
 
-    List<Expr> fields = new ArrayList<>();
+    List<Object> fields = new ArrayList<>();
     if(!check(RIGHT_BRACKET)){
       if(check(NUMBER) || check(IDENTIFIER)){
         fields.add(expression());
