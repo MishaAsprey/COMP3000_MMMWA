@@ -16,27 +16,27 @@ class Interpreter implements Expr.Visitor<Object>,
     
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
-        System.out.println("visitLiteralExpr");
+        //System.out.println("visitLiteralExpr");
     return expr.value;
     }
     @Override
     public Object visitGroupingExpr(Expr.Grouping expr) {
-        System.out.println("visitGroupingExpr");
+        //System.out.println("visitGroupingExpr");
         return evaluate(expr.expression);
     }
     private Object evaluate(Expr expr) {
-        System.out.println("evaluate");
+        //System.out.println("evaluate");
         return expr.accept(this);
     }
 
     private void execute(Stmt stmt) {
-        System.out.println("execute");
+        //System.out.println("execute");
         stmt.accept(this);
     }
 
     void executeBlock(List<Stmt> statements,
                     Environment environment) {
-                        System.out.println("executeBlock");
+                        //System.out.println("executeBlock");
         Environment previous = this.environment;
         try {
             this.environment = environment;
@@ -51,7 +51,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
-        System.out.println("visitBlockStmt");
+        //System.out.println("visitBlockStmt");
         executeBlock(stmt.statements, new Environment(environment));
         return null;
     }
@@ -84,14 +84,14 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
-        System.out.println("visitExpressionStmt");
+        //System.out.println("visitExpressionStmt");
         evaluate(stmt.expression);
         return null;
     }
 
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
-        System.out.println("visitPrintStmt");
+        //System.out.println("visitPrintStmt");
         Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
         return null;
@@ -99,7 +99,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitVarStmt(Stmt.Var stmt) {
-        System.out.println("visitVarStmt");
+        //System.out.println("visitVarStmt");
         Object value = null;
         if (stmt.initializer != null) {
         value = evaluate(stmt.initializer);
@@ -111,7 +111,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitRiverStmt(Stmt.River stmt) {
-        System.out.println("visitRiverStmt");
+        //System.out.println("visitRiverStmt");
         // TODO: evaluate river fields once we have real semantics for them
         List<Object> values = new ArrayList<>();
         for (Object field : stmt.fields) {
@@ -123,7 +123,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitDamStmt(Stmt.Dam stmt) {
-        System.out.println("visitDamStmt");
+        //System.out.println("visitDamStmt");
         // TODO: evaluate river fields once we have real semantics for them
         List<Object> values = new ArrayList<>();
         for (Expr field : stmt.fields) {
@@ -157,7 +157,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
-        System.out.println("visitAssignExpr");
+        //System.out.println("visitAssignExpr");
         Object value = evaluate(expr.value);
         environment.assign(expr.name, value);
         return value;
@@ -165,11 +165,11 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
-        System.out.println("visitBinaryExpr");
+        //System.out.println("visitBinaryExpr");
         Object left = evaluate(expr.left);
         Object right = evaluate(expr.right);
-        System.out.println(expr.left);
-        System.out.println(expr.right);
+        //System.out.println(expr.left);
+        //System.out.println(expr.right);
          
 
         switch (expr.operator.type) {
@@ -299,7 +299,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
-        System.out.println("visitUnaryExpr");
+        //System.out.println("visitUnaryExpr");
         Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
@@ -316,7 +316,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        System.out.println("visitVariableExpr");
+        //System.out.println("visitVariableExpr");
         return environment.get(expr.name);
     }
 
