@@ -36,6 +36,8 @@ class Scanner {
     keywords.put("dam",  DAM);
     keywords.put("Setup", SETUP);
     keywords.put("setup", SETUP);
+    keywords.put("Days", DAYS);
+    keywords.put("days", DAYS);
     keywords.put("default",  DEFAULT);
     keywords.put("when",  WHEN);
   }

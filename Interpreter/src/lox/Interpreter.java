@@ -51,6 +51,14 @@ class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitDaysStmt(Stmt.Days stmt) {
+        for (int day = 0; day < 10; day++) {
+            executeBlock(stmt.statements, new Environment(environment));
+        }
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
         return null;
@@ -240,6 +248,16 @@ class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
         return environment.get(expr.name);
+    }
+
+    @Override
+    public Object visitGetExpr(Expr.Get expr) {
+        Object object = evaluate(expr.object);
+        if (object instanceof List<?> && expr.name.lexeme.equals("flow")) {
+            List<?> fields = (List<?>)object;
+            if (fields.size() > 1) return fields.get(1);
+        }
+        throw new RuntimeError(expr.name, "Only rivers have a 'flow' property.");
     }
 
     private boolean checkNumberOperand(Token operator, Object operand) {

@@ -32,6 +32,7 @@ class Parser {
 
   private Stmt declaration() {
     try {
+      if (match(DAYS)) return daysDeclaration();
         if (match(SETUP)) return setupDeclaration();
         if (match(RIVER)) return riverDeclaration();
         if (match(VAR)) return varDeclaration();
@@ -48,6 +49,13 @@ class Parser {
     List<Stmt> statements = block();
     consume(SEMICOLON, "Expect ';' after Setup block.");
     return new Stmt.Setup(statements);
+  }
+
+  private Stmt daysDeclaration() {
+    consume(LEFT_BRACE, "Expect '{' after Days.");
+    List<Stmt> statements = block();
+    match(SEMICOLON);
+    return new Stmt.Days(statements);
   }
 
   private Stmt statement() {
@@ -286,25 +294,33 @@ class Parser {
   }
 
   private Expr primary() {
-    if (match(FALSE)) return new Expr.Literal(false);
-    if (match(TRUE)) return new Expr.Literal(true);
-    if (match(NIL)) return new Expr.Literal(null);
+    Expr expr;
+    if (match(FALSE)) expr = new Expr.Literal(false);
+    else if (match(TRUE)) expr = new Expr.Literal(true);
+    else if (match(NIL)) expr = new Expr.Literal(null);
 
-    if (match(NUMBER, STRING, WATER_FLOW)) {
-      return new Expr.Literal(previous().literal);
+    else if (match(NUMBER, STRING, WATER_FLOW)) {
+      expr = new Expr.Literal(previous().literal);
     }
 
-    if (match(IDENTIFIER)) {
-      return new Expr.Variable(previous());
+    else if (match(IDENTIFIER)) {
+      expr = new Expr.Variable(previous());
     }
 
-    if (match(LEFT_PAREN)) {
-      Expr expr = expression();
+    else if (match(LEFT_PAREN)) {
+      Expr grouped = expression();
       consume(RIGHT_PAREN, "Expect ')' after expression.");
-      return new Expr.Grouping(expr);
+      expr = new Expr.Grouping(grouped);
+    } else {
+      throw error(peek(), "Expect expression.");
     }
 
-    throw error(peek(), "Expect expression.");
+    while (match(DOT)) {
+      Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+      expr = new Expr.Get(expr, name);
+    }
+
+    return expr;
   }
 
   private boolean match(TokenType... types) {
