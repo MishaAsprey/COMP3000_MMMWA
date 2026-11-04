@@ -12,6 +12,7 @@ class Parser {
 
   private final List<Token> tokens;
   private int current = 0;
+  private boolean setupDeclared = false;
 
   Parser(List<Token> tokens) {
     this.tokens = tokens;
@@ -20,10 +21,21 @@ class Parser {
   List<Stmt> parse() {
     List<Stmt> statements = new ArrayList<>();
     while (!isAtEnd()) {
-      statements.add(declaration());
+      statements.add(topLevelDeclaration());
     }
 
     return statements; 
+  }
+
+  private Stmt topLevelDeclaration() {
+    try {
+      if (match(SETUP)) return setupDeclaration();
+      if (match(DAYS)) return daysDeclaration();
+      throw error(peek(), "Top-level code must be inside a Setup or Days block.");
+    } catch (ParseError error) {
+      synchronize();
+      return null;
+    }
   }
 
   private Expr expression() {
@@ -45,6 +57,11 @@ class Parser {
   }
 
   private Stmt setupDeclaration() {
+    if (setupDeclared) {
+      throw error(previous(), "Only one Setup block is allowed.");
+    }
+    setupDeclared = true;
+
     consume(LEFT_BRACE, "Expect '{' after Setup.");
     List<Stmt> statements = block();
     consume(SEMICOLON, "Expect ';' after Setup block.");
@@ -54,7 +71,7 @@ class Parser {
   private Stmt daysDeclaration() {
     consume(LEFT_BRACE, "Expect '{' after Days.");
     List<Stmt> statements = block();
-    match(SEMICOLON);
+    consume(SEMICOLON, "Expect ';' after Days block.");
     return new Stmt.Days(statements);
   }
 
