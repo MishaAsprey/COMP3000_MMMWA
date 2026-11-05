@@ -17,6 +17,10 @@ public class FlowSimulation {
     private final Map<String, Double> riverLengths =
             new LinkedHashMap<>();
 
+    // Stores the river connections
+    private final Map<String, String> riverConnections = 
+            new LinkedHashMap<>();
+
     public FlowSimulation(int numberOfDays) {
         if (numberOfDays <= 0) {
             throw new IllegalArgumentException(
@@ -70,6 +74,10 @@ public class FlowSimulation {
 
         riverFlows.put(name, dailyFlow);
         riverLengths.put(name, length);
+    }
+
+    public void addRiverConnection(String exitRiver, String enterRiver){
+        riverConnections.put(exitRiver, enterRiver);
     }
 
     // Adds a rainfall event to a river.

@@ -112,12 +112,12 @@ class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Void visitRiverStmt(Stmt.River stmt) {
         //System.out.println("visitRiverStmt");
-        // TODO: evaluate river fields once we have real semantics for them
         List<Object> values = new ArrayList<>();
         for (Object field : stmt.fields) {
             values.add(evaluate((Expr) field));
         }
         environment.define(stmt.name.lexeme, values);
+        flowSimulation.addRiver(stmt.name.lexeme, (Double) values.get(0), (WaterFlow) values.get(1));
         return null;
     }
 
@@ -249,6 +249,10 @@ class Interpreter implements Expr.Visitor<Object>,
                     objects.add(rightName);
                     
                     environment.change("river addition", objects);
+
+                    Token riverLeftName = (Token) leftName;
+                    Token riverRightName = (Token) rightName;
+                    flowSimulation.addRiverConnection(riverLeftName.lexeme, riverRightName.lexeme);
                     return null;
                 }
                 throw new RuntimeError(expr.operator,
