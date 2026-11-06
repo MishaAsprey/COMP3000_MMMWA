@@ -3,6 +3,7 @@ package lox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class Interpreter implements Expr.Visitor<Object>,
                              Stmt.Visitor<Void> {
@@ -72,6 +73,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitDaysStmt(Stmt.Days stmt) {
+        flowSimulation.addRainfall(currentDay, 100);
 
     // Executes the Days block once for each simulation day.
         try {
@@ -82,6 +84,9 @@ class Interpreter implements Expr.Visitor<Object>,
                      stmt.statements,
                        new Environment(environment)
               );
+            //for (Stmt statement : stmt.statements) {
+            //    execute(statement);
+            //}
           }
      } finally {
          currentDay = 1;
@@ -120,12 +125,12 @@ class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Void visitRiverStmt(Stmt.River stmt) {
         //System.out.println("visitRiverStmt");
-        // TODO: evaluate river fields once we have real semantics for them
         List<Object> values = new ArrayList<>();
         for (Object field : stmt.fields) {
             values.add(evaluate((Expr) field));
         }
         environment.define(stmt.name.lexeme, values);
+        flowSimulation.addRiver(stmt.name.lexeme, (Double) values.get(0), (WaterFlow) values.get(1));
         return null;
     }
 
@@ -257,6 +262,10 @@ class Interpreter implements Expr.Visitor<Object>,
                     objects.add(rightName);
                     
                     environment.change("river addition", objects);
+
+                    Token riverLeftName = (Token) leftName;
+                    Token riverRightName = (Token) rightName;
+                    flowSimulation.addConnection(riverLeftName.lexeme, riverRightName.lexeme);
                     return null;
                 }
                 throw new RuntimeError(expr.operator,

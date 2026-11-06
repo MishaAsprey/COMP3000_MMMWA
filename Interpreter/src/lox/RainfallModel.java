@@ -39,6 +39,7 @@ public class RainfallModel {
         }
 
         double area = calculateCatchmentArea(length);
+        //System.out.println("Rainfall: " + rainfall * area / 1000.0);
 
         return rainfall * area / 1000.0;
     }
@@ -67,15 +68,17 @@ public class RainfallModel {
         );
 
         for (int i = 0; i < DAILY_WEIGHTS.length; i++) {
-            int day = startDay + i;
+            //int day = startDay + i;
 
             // Stop if there are no more days in the simulation.
-            if (day >= dailyWater.length) {
-                break;
-            }
+            // if (day >= dailyWater.length) {
+            //     break;
+            // }
 
             // Add to existing water instead of replacing it.
-            dailyWater[day] += totalWater * DAILY_WEIGHTS[i];
+            //System.out.println("day " + i + ", totalWater = " + totalWater + ", daily weight = " + DAILY_WEIGHTS[i]);
+            dailyWater[i] += totalWater * DAILY_WEIGHTS[i];
+            //System.out.println("day " + i + " flow amount " + dailyWater[i]);
         }
     }
 
