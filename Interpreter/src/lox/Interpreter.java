@@ -3,6 +3,7 @@ package lox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class Interpreter implements Expr.Visitor<Object>,
                              Stmt.Visitor<Void> {
@@ -64,6 +65,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitDaysStmt(Stmt.Days stmt) {
+        flowSimulation.addRainfall(currentDay, 100);
 
     // Executes the Days block once for each simulation day.
         try {
@@ -74,6 +76,9 @@ class Interpreter implements Expr.Visitor<Object>,
                      stmt.statements,
                        new Environment(environment)
               );
+            //for (Stmt statement : stmt.statements) {
+            //    execute(statement);
+            //}
           }
      } finally {
          currentDay = 1;

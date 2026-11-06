@@ -80,6 +80,30 @@ public class FlowSimulation {
         riverConnections.put(exitRiver, enterRiver);
     }
 
+    public void addRainfall(int startDay, double rainfallMm){
+        //System.out.println("ran");
+        Set<String> rivers = getRiverNames();
+        //System.out.println(rivers);
+        for(String river: rivers){
+            addRainfallEvent(river, startDay, rainfallMm);
+            //System.out.println("ran river " + river);
+        }
+        for(String river: rivers){
+            String connection = riverConnections.get(river);
+            if(connection != null){
+                double[] exitFlows = riverFlows.get(river);
+                double[] entryFlows = riverFlows.get(connection);
+                for(int i = 1; i < 10; i++){
+                    //System.out.println("day " + i);
+                    //System.out.println(entryFlows[i+1]);
+                    entryFlows[i] += exitFlows[i-1];
+                    //System.out.println(entryFlows[i+1]);
+                }
+                riverFlows.put(connection, entryFlows);
+            }
+        }
+    }
+
     // Adds a rainfall event to a river.
     // startDay is zero-based: 0 = Day 1, 1 = Day 2.
     // RainfallModel distributes the rainfall across ten days.
@@ -87,7 +111,7 @@ public class FlowSimulation {
             String riverName,
             int startDay,
             double rainfallMm) {
-
+        //System.out.println("ran");
         double[] dailyFlow = getRiverSchedule(riverName);
         double length = riverLengths.get(riverName);
 
