@@ -28,7 +28,8 @@ abstract class Stmt {
     final List<Stmt> statements;
   }
   static class Setup extends Stmt {
-    Setup(List<Stmt> statements) {
+    Setup(Token keyword, List<Stmt> statements) {
+      this.keyword = keyword;
       this.statements = statements;
     }
 
@@ -37,6 +38,7 @@ abstract class Stmt {
       return visitor.visitSetupStmt(this);
     }
 
+    final Token keyword;
     final List<Stmt> statements;
   }
   static class Days extends Stmt {

@@ -13,6 +13,7 @@ class Interpreter implements Expr.Visitor<Object>,
         new FlowSimulation(10);
 
     private int currentDay = 1;
+    private boolean setupExecuted = false;
     
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -58,6 +59,13 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitSetupStmt(Stmt.Setup stmt) {
+        if (setupExecuted) {
+            throw new RuntimeError(
+                    stmt.keyword,
+                    "Only one Setup block is allowed."
+            );
+        }
+        setupExecuted = true;
         executeBlock(stmt.statements, environment);
         return null;
     }

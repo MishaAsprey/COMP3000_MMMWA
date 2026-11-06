@@ -61,11 +61,12 @@ class Parser {
       throw error(previous(), "Only one Setup block is allowed.");
     }
     setupDeclared = true;
+    Token keyword = previous();
 
     consume(LEFT_BRACE, "Expect '{' after Setup.");
     List<Stmt> statements = block();
     consume(SEMICOLON, "Expect ';' after Setup block.");
-    return new Stmt.Setup(statements);
+    return new Stmt.Setup(keyword, statements);
   }
 
   private Stmt daysDeclaration() {
