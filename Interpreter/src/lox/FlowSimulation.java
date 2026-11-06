@@ -17,8 +17,19 @@ public class FlowSimulation {
     private final Map<String, Double> riverLengths =
             new LinkedHashMap<>();
 
-    // Stores the river connections
-    private final Map<String, String> riverConnections = 
+    // Stores the connections
+    private final Map<String, String> connections = 
+            new LinkedHashMap<>();
+
+    // Stores each dam and its daily flow schedule.
+    private final Map<String, double[]> damAmounts =
+            new LinkedHashMap<>();
+
+    // Stores the size of each dam.
+    private final Map<String, Double> damSizes =
+            new LinkedHashMap<>();
+
+    private final Map<String, Map<Double, String>> damCases =
             new LinkedHashMap<>();
 
     public FlowSimulation(int numberOfDays) {
@@ -76,38 +87,79 @@ public class FlowSimulation {
         riverLengths.put(name, length);
     }
 
-    public void addRiverConnection(String exitRiver, String enterRiver){
-        riverConnections.put(exitRiver, enterRiver);
+    public void addDam(
+            String name,
+            double size,
+            WaterFlow currentVol,
+            WaterFlow maxVol) {
+
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Dam must have a name."
+            );
+        }
+
+        if (!Double.isFinite(size) || size < 0) {
+            throw new IllegalArgumentException(
+                    "Dam size must be non-negative."
+            );
+        }
+
+        if (currentVol == null ||
+                !Double.isFinite(currentVol.value) ||
+                currentVol.value < 0) {
+
+            throw new IllegalArgumentException(
+                    "Current volume must be non-negative."
+            );
+        }
+
+        if (maxVol == null ||
+                !Double.isFinite(maxVol.value) ||
+                maxVol.value < 0) {
+
+            throw new IllegalArgumentException(
+                    "Max volume must be non-negative."
+            );
+        }
+
+        if (damAmounts.containsKey(name)) {
+            throw new IllegalArgumentException(
+                    "Dam already exists: " + name
+            );
+        }
+
+        double[] dailyFlow = new double[numberOfDays];
+
+        dailyFlow[0] = currentVol.value;
+
+        damAmounts.put(name, dailyFlow);
+        damSizes.put(name, size);
+    }
+
+    public void addConnection(String exitRiver, String enterRiver){
+        connections.put(exitRiver, enterRiver);
     }
 
     public void addRainfall(int startDay, double rainfallMm){
         //System.out.println("ran");
         Set<String> rivers = getRiverNames();
+        Set<String> dams = getDamNames();
         //System.out.println(rivers);
         for(String river: rivers){
-            addRainfallEvent(river, startDay, rainfallMm);
+            addRiverRainfallEvent(river, startDay, rainfallMm);
             //System.out.println("ran river " + river);
         }
-        for(String river: rivers){
-            String connection = riverConnections.get(river);
-            if(connection != null){
-                double[] exitFlows = riverFlows.get(river);
-                double[] entryFlows = riverFlows.get(connection);
-                for(int i = 1; i < 10; i++){
-                    //System.out.println("day " + i);
-                    //System.out.println(entryFlows[i+1]);
-                    entryFlows[i] += exitFlows[i-1];
-                    //System.out.println(entryFlows[i+1]);
-                }
-                riverFlows.put(connection, entryFlows);
-            }
+        for(String dam: dams){
+            addDamRainfallEvent(dam, startDay, rainfallMm);
         }
+        addConnectionFlows(rivers, dams);
     }
 
     // Adds a rainfall event to a river.
     // startDay is zero-based: 0 = Day 1, 1 = Day 2.
     // RainfallModel distributes the rainfall across ten days.
-    public void addRainfallEvent(
+    public void addRiverRainfallEvent(
             String riverName,
             int startDay,
             double rainfallMm) {
@@ -123,6 +175,22 @@ public class FlowSimulation {
         );
     }
 
+    public void addDamRainfallEvent(
+            String damName,
+            int startDay,
+            double rainfallMm) {
+        //System.out.println("ran");
+        double[] dailyFlow = getDamSchedule(damName);
+        double size = damSizes.get(damName);
+
+        RainfallModel.addRainfallEvent(
+                dailyFlow,
+                startDay,
+                rainfallMm,
+                size
+        );
+    }
+
     // Gets the flow of a river on a particular day.
     // Day numbers are one-based: 1 = Day 1, 2 = Day 2.
     public WaterFlow getDailyFlow(
@@ -130,6 +198,9 @@ public class FlowSimulation {
             int day) {
 
         double[] dailyFlow = getRiverSchedule(riverName);
+        if(dailyFlow == null){
+            dailyFlow = getDamSchedule(riverName);
+        }
 
         if (day < 1 || day > numberOfDays) {
             throw new IllegalArgumentException(
@@ -143,13 +214,24 @@ public class FlowSimulation {
 
     // Returns a copy of all daily flows for a river.
     public double[] getDailyFlows(String riverName) {
-        return getRiverSchedule(riverName).clone();
+        if(getRiverSchedule(riverName) != null){
+            return getRiverSchedule(riverName).clone();
+        }
+        else{
+            return getDamSchedule(riverName).clone();
+        }
     }
 
     // Returns all registered river names.
     public Set<String> getRiverNames() {
         return Collections.unmodifiableSet(
                 riverFlows.keySet()
+        );
+    }
+
+    public Set<String> getDamNames() {
+        return Collections.unmodifiableSet(
+                damAmounts.keySet()
         );
     }
 
@@ -162,11 +244,73 @@ public class FlowSimulation {
         double[] schedule = riverFlows.get(riverName);
 
         if (schedule == null) {
-            throw new IllegalArgumentException(
-                    "River does not exist: " + riverName
-            );
+            // throw new IllegalArgumentException(
+            //         "River does not exist: " + riverName
+            // );
+            return null;
         }
 
         return schedule;
+    }
+
+    private double[] getDamSchedule(String damName) {
+        double[] schedule = damAmounts.get(damName);
+
+        if (schedule == null) {
+            // throw new IllegalArgumentException(
+            //         "River does not exist: " + damName
+            // );
+            return null;
+        }
+
+        return schedule;
+    }
+
+    public void addConnectionFlows(Set<String> rivers, Set<String> dams){
+        for(String river: rivers){
+            String connection = connections.get(river);
+            if(connection != null){
+                boolean isRiver = true;
+                double[] exitFlows = riverFlows.get(river);
+                double[] entryFlows = riverFlows.get(connection);
+                if(entryFlows == null){
+                    entryFlows = damAmounts.get(connection);
+                    isRiver = false;
+                }
+                for(int i = 1; i < 10; i++){
+                    //System.out.println("day " + i);
+                    //System.out.println(entryFlows[i+1]);
+                    entryFlows[i] += exitFlows[i-1];
+                    //System.out.println(entryFlows[i+1]);
+                }
+                if(isRiver){
+                    riverFlows.put(connection, entryFlows);
+                }
+                else{
+                    damAmounts.put(connection, entryFlows);
+                }
+            }
+        }
+        for(String dam : dams){
+            String connection = connections.get(dam);
+            if(connection != null){
+                boolean isRiver = true;
+                double[] exitFlows = damAmounts.get(dam);
+                double[] entryFlows = riverFlows.get(connection);
+                if(entryFlows == null){
+                    isRiver = false;
+                    entryFlows = damAmounts.get(connection);
+                }
+                for(int i = 1; i < 10; i++){
+                    entryFlows[i] += exitFlows[i-1];
+                }
+                if(isRiver){
+                    riverFlows.put(connection, entryFlows);
+                }
+                else{
+                    damAmounts.put(connection, entryFlows);
+                }
+            }
+        }
     }
 }

@@ -257,7 +257,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
                     Token riverLeftName = (Token) leftName;
                     Token riverRightName = (Token) rightName;
-                    flowSimulation.addRiverConnection(riverLeftName.lexeme, riverRightName.lexeme);
+                    flowSimulation.addConnection(riverLeftName.lexeme, riverRightName.lexeme);
                     return null;
                 }
                 throw new RuntimeError(expr.operator,
