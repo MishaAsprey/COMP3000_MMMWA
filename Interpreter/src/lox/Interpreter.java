@@ -158,9 +158,56 @@ class Interpreter implements Expr.Visitor<Object>,
         WaterFlow currentVol = (WaterFlow) values.get(1);
         WaterFlow maxVol = (WaterFlow) values.get(2);
 
-        List<Expr> percentages = (List<Expr>) stmt.cases.get(0);
-        List<String> conditions = (List<String>) stmt.cases.get(1);
-        List<Expr> flows = (List<Expr>) stmt.cases.get(2);
+        Object pCheck = stmt.cases.get(0);
+        List<Expr> percentages = new ArrayList<>();
+        if(pCheck instanceof List<?>){
+            List<?> pCheck2 = (List<?>) pCheck;
+            for(Object element : pCheck2){
+                if(element instanceof Expr){
+                    percentages.add((Expr) element);
+                }
+            }
+        }
+        else{
+            throw new RuntimeError(
+                    stmt.name,
+                    "percentages is not correct type"
+                );
+        }
+
+        Object cCheck = stmt.cases.get(1);
+        List<String> conditions = new ArrayList<>();
+        if(cCheck instanceof List<?>){
+            List<?> cCheck2 = (List<?>) cCheck;
+            for(Object element : cCheck2){
+                if(element instanceof String){
+                    conditions.add((String) element);
+                }
+            }
+        }
+        else{
+            throw new RuntimeError(
+                    stmt.name,
+                    "conditions is not correct type"
+                );
+        }
+
+        Object fCheck = stmt.cases.get(2);
+        List<Expr> flows = new ArrayList<>();
+        if(fCheck instanceof List<?>){
+            List<?> fCheck2 = (List<?>) fCheck;
+            for(Object element : fCheck2){
+                if(element instanceof Expr){
+                    flows.add((Expr) element);
+                }
+            }
+        }
+        else{
+            throw new RuntimeError(
+                    stmt.name,
+                    "flows is not correct type"
+                );
+        }
 
         List<Object> percentagesActual = new ArrayList<>();
         for(Expr percentage : percentages){

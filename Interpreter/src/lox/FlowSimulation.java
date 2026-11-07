@@ -149,9 +149,49 @@ public class FlowSimulation {
         damSizes.put(name, size);
         damMaxes.put(name, maxVol);
 
-        List<Object> percentages = (List<Object>) cases.get(0);
-        List<String> conditions = (List<String>) cases.get(1);
-        List<Object> flows = (List<Object>) cases.get(2);
+        Object pCheck = cases.get(0);
+        List<Object> percentages = new ArrayList<>();
+        if(pCheck instanceof List<?>){
+            List<?> pCheck2 = (List<?>) pCheck;
+            for(Object element : pCheck2){
+                percentages.add((Expr) element);
+            }
+        }
+        else{
+            throw new IllegalArgumentException(
+                    "Dam does not have correct cases: " + name
+            );
+        }
+
+        Object cCheck = cases.get(1);
+        List<String> conditions = new ArrayList<>();
+        if(cCheck instanceof List<?>){
+            List<?> cCheck2 = (List<?>) cCheck;
+            for(Object element : cCheck2){
+                if(element instanceof String){
+                    conditions.add((String) element);
+                }
+            }
+        }
+        else{
+            throw new IllegalArgumentException(
+                    "Dam does not have correct cases: " + name
+            );
+        }
+
+        Object fCheck = cases.get(2);
+        List<Object> flows = new ArrayList<>();
+        if(fCheck instanceof List<?>){
+            List<?> fCheck2 = (List<?>) fCheck;
+            for(Object element : fCheck2){
+                flows.add(element);
+            }
+        }
+        else{
+            throw new IllegalArgumentException(
+                    "Dam does not have correct cases: " + name
+            );
+        }
 
         List<Double> percentagesActual = new ArrayList<>();
         List<String> conditionsActual = new ArrayList<>();
@@ -346,9 +386,53 @@ public class FlowSimulation {
                     int j = 0;
                     double percent = exitFlows[i-1] / max * 100;
                     List<Object> cases = damCases.get(dam);
-                    List<Double> percentages = (List<Double>) cases.get(0);
-                    List<String> conditions = (List<String>) cases.get(1);
-                    List<WaterFlow> flows = (List<WaterFlow>) cases.get(2);
+                    Object pCheck = cases.get(0);
+                    List<Double> percentages = new ArrayList<>();
+                    if(pCheck instanceof List<?>){
+                        List<?> pCheck2 = (List<?>) pCheck;
+                        for(Object element : pCheck2){
+                            if(element instanceof Double){
+                                percentages.add((Double) element);
+                            }
+                        }
+                    }
+                    else{
+                        throw new IllegalArgumentException(
+                            "Incorrect case"
+                        );
+                    }
+
+                    Object cCheck = cases.get(1);
+                    List<String> conditions = new ArrayList<>();
+                    if(cCheck instanceof List<?>){
+                        List<?> cCheck2 = (List<?>) cCheck;
+                        for(Object element : cCheck2){
+                            if(element instanceof String){
+                                conditions.add((String) element);
+                            }
+                        }
+                    }
+                    else{
+                        throw new IllegalArgumentException(
+                            "Incorrect case"
+                        );
+                    }
+
+                    Object fCheck = cases.get(2);
+                    List<WaterFlow> flows = new ArrayList<>();
+                    if(fCheck instanceof List<?>){
+                        List<?> fCheck2 = (List<?>) fCheck;
+                        for(Object element : fCheck2){
+                            if(element instanceof WaterFlow){
+                                flows.add((WaterFlow) element);
+                            }
+                        }
+                    }
+                    else{
+                        throw new IllegalArgumentException(
+                            "Incorrect case"
+                        );
+                    }
                     //System.out.println("percentages size " + percentages.size());
                     while(j < percentages.size()){
                         //System.out.println("ran 2");

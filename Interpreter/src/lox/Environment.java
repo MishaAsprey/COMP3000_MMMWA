@@ -58,11 +58,12 @@ class Environment {
                 String river1Name = river1.lexeme;
                 Token river2 = (Token) objects.get(1);
                 String river2Name = river2.lexeme;
-                List<Object> river1Values = (List<Object>) values.get(river1Name);
-                if(river1Values.size() == 2){
-                river1Values.add(river2Name);
-                    for(int i = 0; i < river1Values.size(); i++){
-                        System.out.println(river1Values.get(i));
+                Object river1ValuesCheck = values.get(river1Name);
+                if(river1ValuesCheck instanceof List<?>){
+                    List<Object> river1Values = new ArrayList<>();
+                    river1Values.addAll((List<?>) river1ValuesCheck);
+                    if(river1Values.size() == 2){
+                        river1Values.add(river2Name);
                     }
                 }
                 break;
