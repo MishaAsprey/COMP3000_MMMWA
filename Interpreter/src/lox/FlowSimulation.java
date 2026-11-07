@@ -1,7 +1,9 @@
 package lox;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +31,10 @@ public class FlowSimulation {
     private final Map<String, Double> damSizes =
             new LinkedHashMap<>();
 
-    private final Map<String, Map<Double, String>> damCases =
+    private final Map<String, WaterFlow> damMaxes =
+            new LinkedHashMap<>();
+
+    private final Map<String, List<Object>> damCases =
             new LinkedHashMap<>();
 
     public FlowSimulation(int numberOfDays) {
@@ -91,7 +96,8 @@ public class FlowSimulation {
             String name,
             double size,
             WaterFlow currentVol,
-            WaterFlow maxVol) {
+            WaterFlow maxVol,
+            List<Object> cases) {
 
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException(
@@ -129,12 +135,45 @@ public class FlowSimulation {
             );
         }
 
+        if(cases.size() != 3){
+            throw new IllegalArgumentException(
+                    "Dam does not have correct cases: " + name
+            );
+        }
+
         double[] dailyFlow = new double[numberOfDays];
 
         dailyFlow[0] = currentVol.value;
 
         damAmounts.put(name, dailyFlow);
         damSizes.put(name, size);
+        damMaxes.put(name, maxVol);
+
+        List<Object> percentages = (List<Object>) cases.get(0);
+        List<String> conditions = (List<String>) cases.get(1);
+        List<Object> flows = (List<Object>) cases.get(2);
+
+        List<Double> percentagesActual = new ArrayList<>();
+        List<String> conditionsActual = new ArrayList<>();
+        List<WaterFlow> flowsActual = new ArrayList<>();
+
+        int i = 0;
+        while(i < percentages.size()){
+            if(percentages.get(i) instanceof Double && flows.get(i) instanceof WaterFlow){
+                percentagesActual.add((Double) percentages.get(i));
+                conditionsActual.add(conditions.get(i));
+                flowsActual.add((WaterFlow) flows.get(i));
+            }
+            i++;
+        }
+        flowsActual.add((WaterFlow) flows.get(i));
+
+        List<Object> casesActual = new ArrayList<>();
+        casesActual.add(percentagesActual);
+        casesActual.add(conditionsActual);
+        casesActual.add(flowsActual);
+
+        damCases.put(name, casesActual);
     }
 
     public void addConnection(String exitRiver, String enterRiver){
@@ -297,12 +336,102 @@ public class FlowSimulation {
                 boolean isRiver = true;
                 double[] exitFlows = damAmounts.get(dam);
                 double[] entryFlows = riverFlows.get(connection);
+                double max = damMaxes.get(dam).value;
                 if(entryFlows == null){
                     isRiver = false;
                     entryFlows = damAmounts.get(connection);
                 }
                 for(int i = 1; i < 10; i++){
-                    entryFlows[i] += exitFlows[i-1];
+                    WaterFlow exitAmount = new WaterFlow(0);
+                    int j = 0;
+                    double percent = exitFlows[i-1] / max * 100;
+                    List<Object> cases = damCases.get(dam);
+                    List<Double> percentages = (List<Double>) cases.get(0);
+                    List<String> conditions = (List<String>) cases.get(1);
+                    List<WaterFlow> flows = (List<WaterFlow>) cases.get(2);
+                    //System.out.println("percentages size " + percentages.size());
+                    while(j < percentages.size()){
+                        //System.out.println("ran 2");
+                        if(conditions.get(j).equals("=")){
+                            //System.out.println("condition 1 '='");
+                            if(percent == percentages.get(j)){
+                                if(flows.get(j).value > exitFlows[i-1]){
+                                    exitAmount.value = exitFlows[i-1];
+                                }
+                                else{
+                                    exitAmount.value = flows.get(j).value;
+                                }
+                                break;
+                            }
+                        }
+                        else if(conditions.get(j).equals("<")){
+                            //System.out.println("condition 2 '<'");
+                            if(percent < percentages.get(j)){
+                                if(flows.get(j).value > exitFlows[i-1]){
+                                    exitAmount.value = exitFlows[i-1];
+                                }
+                                else{
+                                    exitAmount.value = flows.get(j).value;
+                                }
+                                break;
+                            }
+                        }
+                        else if(conditions.get(j).equals("<=")){
+                           // System.out.println("condition 3 '<='");
+                            if(percent <= percentages.get(j)){
+                                if(flows.get(j).value > exitFlows[i-1]){
+                                    exitAmount.value = exitFlows[i-1];
+                                }
+                                else{
+                                    exitAmount.value = flows.get(j).value;
+                                }
+                                break;
+                            }
+                        }
+                        else if(conditions.get(j).equals(">")){
+                            //System.out.println("condition 4 '>'");
+                            if(percent > percentages.get(j)){
+                                if(flows.get(j).value > exitFlows[i-1]){
+                                    exitAmount.value = exitFlows[i-1];
+                                }
+                                else{
+                                    exitAmount.value = flows.get(j).value;
+                                }
+                                break;
+                            }
+                            
+                        }
+                        else if(conditions.get(j).equals(">=")){
+                            //System.out.println("condition 5 '>='");
+                            if(percent >= percentages.get(j)){
+                                if(flows.get(j).value > exitFlows[i-1]){
+                                    exitAmount.value = exitFlows[i-1];
+                                }
+                                else{
+                                    exitAmount.value = flows.get(j).value;
+                                }
+                                break;
+                            }
+                            
+                        }
+                        //System.out.println("completed while");
+                        j++;
+                    }
+                    if(j == percentages.size()){
+                        if(flows.get(j).value > exitFlows[i-1]){
+                            exitAmount.value = exitFlows[i-1];
+                        }
+                        else{
+                            exitAmount.value = flows.get(j).value;
+                        }
+                    }
+                    if(exitFlows[i-1] - exitAmount.value > max){
+                        exitAmount.value += (exitFlows[i-1] - exitAmount.value) - max;
+                    }
+                    //System.out.println("j " + j);
+                    //System.out.println(exitAmount.value);
+                    entryFlows[i] += exitAmount.value;
+                    exitFlows[i] += exitFlows[i-1] - exitAmount.value;
                 }
                 if(isRiver){
                     riverFlows.put(connection, entryFlows);

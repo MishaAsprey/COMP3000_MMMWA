@@ -108,7 +108,7 @@ static class River extends Stmt {
   }
 
   static class Dam extends Stmt {
-    Dam(Token name, List<Expr> fields, Map<String, List<Expr>> cases) {
+    Dam(Token name, List<Expr> fields, List<Object> cases) {
         this.name = name;
         this.fields = fields;
         this.cases = cases;
@@ -121,7 +121,7 @@ static class River extends Stmt {
 
     final Token name;
     final List<Expr> fields;
-    final Map<String, List<Expr>> cases;
+    final List<Object> cases;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

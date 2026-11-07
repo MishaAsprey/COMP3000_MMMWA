@@ -74,7 +74,7 @@ public class FlowSimulationTest {
                 new WaterFlow(0.0)
         );
 
-        simulation.addRainfallEvent(
+        simulation.addRiverRainfallEvent(
                 "RiverA",
                 0,
                 10.0
@@ -122,8 +122,8 @@ public class FlowSimulationTest {
                 new WaterFlow(0.0)
         );
 
-        simulation.addRainfallEvent("RiverA", 0, 10.0);
-        simulation.addRainfallEvent("RiverA", 1, 10.0);
+        simulation.addRiverRainfallEvent("RiverA", 0, 10.0);
+        simulation.addRiverRainfallEvent("RiverA", 1, 10.0);
 
         // Day 2:
         // First event contributes 0.25.
@@ -147,7 +147,7 @@ public class FlowSimulationTest {
                 new WaterFlow(5.0)
         );
 
-        simulation.addRainfallEvent("RiverA", 0, 10.0);
+        simulation.addRiverRainfallEvent("RiverA", 0, 10.0);
 
         check(
                 "Initial flow plus rainfall on Day 1",

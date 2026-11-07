@@ -143,9 +143,10 @@ class Interpreter implements Expr.Visitor<Object>,
             values.add(evaluate(field));
         }
 
-        if (values.size() != 2 ||
+        if (values.size() != 3 ||
                 !(values.get(0) instanceof Double) ||
-                !(values.get(1) instanceof WaterFlow)) {
+                !(values.get(1) instanceof WaterFlow) ||
+                !(values.get(2) instanceof WaterFlow)) {
 
             throw new RuntimeError(
                     stmt.name,
@@ -154,17 +155,30 @@ class Interpreter implements Expr.Visitor<Object>,
         }
 
         double length = (double) values.get(0);
-        WaterFlow initialFlow = (WaterFlow) values.get(1);
+        WaterFlow currentVol = (WaterFlow) values.get(1);
+        WaterFlow maxVol = (WaterFlow) values.get(2);
 
-        // Registers the river with the simulation.
-        flowSimulation.addRiver(
-                    stmt.name.lexeme,
-                    length,
-                initialFlow
-        );
+        List<Expr> percentages = (List<Expr>) stmt.cases.get(0);
+        List<String> conditions = (List<String>) stmt.cases.get(1);
+        List<Expr> flows = (List<Expr>) stmt.cases.get(2);
 
-        // Stores the river declaration in the environment.
+        List<Object> percentagesActual = new ArrayList<>();
+        for(Expr percentage : percentages){
+            percentagesActual.add(evaluate(percentage));
+        }
+
+        List<Object> flowsActual = new ArrayList<>();
+        for(Expr flow : flows){
+            flowsActual.add(evaluate(flow));
+        }
+
+        List<Object> cases = new ArrayList<>();
+        cases.add(percentagesActual);
+        cases.add(conditions);
+        cases.add(flowsActual);
+
         environment.define(stmt.name.lexeme, values);
+        flowSimulation.addDam(stmt.name.lexeme, length, currentVol, maxVol, cases);
         return null;
     }
 
@@ -181,8 +195,8 @@ class Interpreter implements Expr.Visitor<Object>,
         //System.out.println("visitBinaryExpr");
         Object left = evaluate(expr.left);
         Object right = evaluate(expr.right);
-        //System.out.println(expr.left);
-        //System.out.println(expr.right);
+        //System.out.println(left.getClass());
+        //System.out.println(left);
          
 
         switch (expr.operator.type) {
@@ -251,7 +265,7 @@ class Interpreter implements Expr.Visitor<Object>,
                     WaterFlow newWaterFlow = new WaterFlow(leftWaterFlow.value + rightWaterFlow.value);
                     return newWaterFlow;
                 }
-                else if(checkRiverOperands(left, right)){
+                else if(checkRiverOrDamOperands(left, right)){
                     Expr.Variable left2 = (Expr.Variable) expr.left;
                     Expr.Variable right2 = (Expr.Variable) expr.right;
                     Object leftName = left2.name;
@@ -391,11 +405,31 @@ class Interpreter implements Expr.Visitor<Object>,
         return false;
     }
 
-    private boolean checkRiverOperands(Object left, Object right) {
+    private boolean checkRiverOrDamOperands(Object left, Object right) {
         if (left instanceof ArrayList && right instanceof ArrayList){
             ArrayList<?> leftCheck = (ArrayList<?>) left;
             ArrayList<?> rightCheck = (ArrayList<?>) right;
-            if(((leftCheck.size() == 2 && leftCheck.get(0) instanceof Double && leftCheck.get(1) instanceof WaterFlow) || (leftCheck.size() == 3 && leftCheck.get(0) instanceof Double && leftCheck.get(1) instanceof WaterFlow && leftCheck.get(2) instanceof String)) && ((rightCheck.size() == 2 && rightCheck.get(0) instanceof Double && rightCheck.get(1) instanceof WaterFlow) || (rightCheck.size() == 2 && rightCheck.get(0) instanceof Double && rightCheck.get(1) instanceof WaterFlow && rightCheck.get(2) instanceof String))){
+            boolean leftCorrect = false;
+            boolean rightCorrect = false;
+            if((leftCheck.size() == 2 && leftCheck.get(0) instanceof Double && leftCheck.get(1) instanceof WaterFlow)){
+                leftCorrect = true;
+            }
+            else if(leftCheck.size() == 3 && leftCheck.get(0) instanceof Double && leftCheck.get(1) instanceof WaterFlow && leftCheck.get(2) instanceof String){
+                leftCorrect = true;
+            }
+            else if(leftCheck.size() == 3 && leftCheck.get(0) instanceof Double && leftCheck.get(1) instanceof WaterFlow && leftCheck.get(2) instanceof WaterFlow){
+                leftCorrect = true;
+            }
+            if((rightCheck.size() == 2 && rightCheck.get(0) instanceof Double && rightCheck.get(1) instanceof WaterFlow)){
+                rightCorrect = true;
+            }
+            else if(rightCheck.size() == 3 && rightCheck.get(0) instanceof Double && rightCheck.get(1) instanceof WaterFlow && rightCheck.get(2) instanceof String){
+                rightCorrect = true;
+            }
+            else if(rightCheck.size() == 3 && rightCheck.get(0) instanceof Double && rightCheck.get(1) instanceof WaterFlow && rightCheck.get(2) instanceof WaterFlow){
+                rightCorrect = true;
+            }
+            if(leftCorrect && rightCorrect){
                 return true;
             }
         };

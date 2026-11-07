@@ -158,8 +158,13 @@ class Parser {
 
     consume(LEFT_BRACE, "Expect '{' after dam fields.");
 
-    List<Expr> nums = new ArrayList<>();
-    Map<String, List<Expr>> cases = new HashMap<>();
+    //change
+    //List<Expr> nums = new ArrayList<>();
+    //Map<String, List<Expr>> cases = new HashMap<>();
+
+    List<Expr> percentages = new ArrayList<>();
+    List<String> conditions = new ArrayList<>();
+    List<Expr> flows = new ArrayList<>();
 
     while(!check(DEFAULT)){
       consume(WHEN, "Expect when");
@@ -187,25 +192,26 @@ class Parser {
       else{
         error(peek(), "Expected =, <, <=, > or >=");
       }
-      nums.add(expression());
+      conditions.add(bool);
+      percentages.add(expression());
       consume(PERCENT, "Expect %");
       consume(EQUAL, "Expect =");
       if(check(WATER_FLOW) || check(IDENTIFIER)){
-        nums.add(expression());
-        cases.put(bool, nums);
+        flows.add(expression());
+        //cases.put(bool, nums);
       }
       else{
         error(peek(), "Expected Water_Flow expression");
       }
-      nums = new ArrayList<>();
+      //nums = new ArrayList<>();
       consume(COMMA, "Expect ,");
     }
 
     consume(DEFAULT, "Expect default case");
     consume(EQUAL, "Expect =");
     if(check(WATER_FLOW) || check(IDENTIFIER)){
-      nums.add(expression());
-      cases.put("Default", nums);
+      flows.add(expression());
+      //cases.put("Default", nums);
     }
     else{
       error(peek(), "Expected Water_Flow expression");
@@ -214,6 +220,13 @@ class Parser {
     consume(RIGHT_BRACE, "Expect '}' after dam fields.");
 
     consume(SEMICOLON, "Expect ';' after dam declaration.");
+
+    List<Object> cases = new ArrayList<>();
+    cases.add(percentages);
+    cases.add(conditions);
+    cases.add(flows);
+
+
 
     return new Stmt.Dam(name, fields, cases);
   }
