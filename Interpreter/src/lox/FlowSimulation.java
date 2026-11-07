@@ -346,46 +346,42 @@ public class FlowSimulation {
     }
 
     public void addConnectionFlows(Set<String> rivers, Set<String> dams){
-        for(String river: rivers){
-            String connection = connections.get(river);
-            if(connection != null){
-                boolean isRiver = true;
-                double[] exitFlows = riverFlows.get(river);
-                double[] entryFlows = riverFlows.get(connection);
-                if(entryFlows == null){
-                    entryFlows = damAmounts.get(connection);
-                    isRiver = false;
-                }
-                for(int i = 1; i < 10; i++){
-                    //System.out.println("day " + i);
-                    //System.out.println(entryFlows[i+1]);
+        for(int i = 1; i < 10; i++){
+            for(String river: rivers){
+                String connection = connections.get(river);
+                if(connection != null){
+                    boolean isRiver = true;
+                    double[] exitFlows = riverFlows.get(river);
+                    double[] entryFlows = riverFlows.get(connection);
+                    if(entryFlows == null){
+                        entryFlows = damAmounts.get(connection);
+                        isRiver = false;
+                    }
                     entryFlows[i] += exitFlows[i-1];
-                    //System.out.println(entryFlows[i+1]);
-                }
-                if(isRiver){
-                    riverFlows.put(connection, entryFlows);
-                }
-                else{
-                    damAmounts.put(connection, entryFlows);
+                    if(isRiver){
+                        riverFlows.put(connection, entryFlows);
+                    }
+                    else{
+                        damAmounts.put(connection, entryFlows);
+                    }
                 }
             }
-        }
-        for(String dam : dams){
-            String connection = connections.get(dam);
-            if(connection != null){
-                boolean isRiver = true;
-                double[] exitFlows = damAmounts.get(dam);
-                double[] entryFlows = riverFlows.get(connection);
-                double max = damMaxes.get(dam).value;
-                if(entryFlows == null){
-                    isRiver = false;
-                    entryFlows = damAmounts.get(connection);
-                }
-                for(int i = 1; i < 10; i++){
+            for(String dam : dams){
+                String connection = connections.get(dam);
+                if(connection != null){
+                    boolean isRiver = true;
+                    double[] exitFlows = damAmounts.get(dam);
+                    double[] entryFlows = riverFlows.get(connection);
+                    double max = damMaxes.get(dam).value;
+                    if(entryFlows == null){
+                        isRiver = false;
+                        entryFlows = damAmounts.get(connection);
+                    }
                     WaterFlow exitAmount = new WaterFlow(0);
                     int j = 0;
                     double percent = exitFlows[i-1] / max * 100;
                     List<Object> cases = damCases.get(dam);
+
                     Object pCheck = cases.get(0);
                     List<Double> percentages = new ArrayList<>();
                     if(pCheck instanceof List<?>){
@@ -461,7 +457,7 @@ public class FlowSimulation {
                             }
                         }
                         else if(conditions.get(j).equals("<=")){
-                           // System.out.println("condition 3 '<='");
+                        // System.out.println("condition 3 '<='");
                             if(percent <= percentages.get(j)){
                                 if(flows.get(j).value > exitFlows[i-1]){
                                     exitAmount.value = exitFlows[i-1];
@@ -516,12 +512,12 @@ public class FlowSimulation {
                     //System.out.println(exitAmount.value);
                     entryFlows[i] += exitAmount.value;
                     exitFlows[i] += exitFlows[i-1] - exitAmount.value;
-                }
-                if(isRiver){
-                    riverFlows.put(connection, entryFlows);
-                }
-                else{
-                    damAmounts.put(connection, entryFlows);
+                    if(isRiver){
+                        riverFlows.put(connection, entryFlows);
+                    }
+                    else{
+                        damAmounts.put(connection, entryFlows);
+                    }
                 }
             }
         }
